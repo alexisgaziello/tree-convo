@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      d3-hierarchy:
+        specifier: ^3.1.2
+        version: 3.1.2
     devDependencies:
       '@types/node':
         specifier: ^25.5.0
@@ -315,6 +319,10 @@ packages:
 
   cuint@0.2.2:
     resolution: {integrity: sha512-d4ZVpCW31eWwCMe1YT3ur7mUDnTXbgwyzaL320DrcRT45rfjYxkt5QWLrmOJ+/UEAI2+fQgKe/fCjR8l4TpRgw==}
+
+  d3-hierarchy@3.1.2:
+    resolution: {integrity: sha512-FX/9frcub54beBdugHjDCdikxThEqjnR93Qt7PvQTOHxyiNCAlvMrHhclk3cD5VeAaq9fxmfRp+CnWw9rEMBuA==}
+    engines: {node: '>=12'}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -1078,6 +1086,8 @@ snapshots:
       which: 2.0.2
 
   cuint@0.2.2: {}
+
+  d3-hierarchy@3.1.2: {}
 
   debug@4.4.3:
     dependencies:
