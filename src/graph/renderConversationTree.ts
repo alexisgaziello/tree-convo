@@ -173,10 +173,15 @@ export function renderConversationTree(
   if (nodes.length === 0) {
     return;
   }
-  const minGraphX = Math.min(...nodes.map((node) => node.x - (NODE_RADIUS + 5)));
-  const maxGraphX = Math.max(...nodes.map((node) => node.x + (NODE_RADIUS + 5)));
-  const minGraphY = Math.min(...nodes.map((node) => node.y - (NODE_RADIUS + 5)));
-  const maxGraphY = Math.max(...nodes.map((node) => node.y + (NODE_RADIUS + 5)));
+  const margin = NODE_RADIUS + 6;
+  let minGraphX = Infinity, maxGraphX = -Infinity;
+  let minGraphY = Infinity, maxGraphY = -Infinity;
+  for (const node of nodes) {
+    if (node.x - margin < minGraphX) minGraphX = node.x - margin;
+    if (node.x + margin > maxGraphX) maxGraphX = node.x + margin;
+    if (node.y - margin < minGraphY) minGraphY = node.y - margin;
+    if (node.y + margin > maxGraphY) maxGraphY = node.y + margin;
+  }
   const graphWidth = maxGraphX - minGraphX;
   const graphHeight = maxGraphY - minGraphY;
   const width = Math.max(graphWidth + CANVAS_PADDING_X * 2, MIN_CANVAS_WIDTH);

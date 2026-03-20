@@ -23,8 +23,7 @@ let lastRenderedSignature = '';
 function getTurnElement(nodeId: string): Element | null {
   return (
     document.querySelector(`section[data-turn-id="${nodeId}"]`) ??
-    document.querySelector(`[data-message-id="${nodeId}"]`) ??
-    document.querySelector(`[data-turn-id="${nodeId}"]`)
+    document.querySelector(`[data-message-id="${nodeId}"]`)
   );
 }
 
@@ -43,14 +42,7 @@ function centerConversationNode(nodeId: string): void {
 }
 
 function logTreeNodes(): void {
-  const snapshot = store.getSnapshot();
-  const nodes = Object.values(snapshot.nodes);
-
-  console.log(`[${APP_PREFIX}] nodes`, nodes.length);
-
-  for (const node of nodes) {
-    console.log(`[${APP_PREFIX}] node`, node.id, node.type);
-  }
+  // Debug logging removed for production
 }
 
 function getSnapshotSignature(): string {

@@ -1,6 +1,5 @@
-import { APP_IDS } from '../constants';
+import { APP_IDS, TOGGLE_TOP_VH } from '../constants';
 
-const TOGGLE_TOP_VH = 25;
 const TOGGLE_COLLAPSED_WIDTH_PX = 22;
 const TOGGLE_EXPANDED_WIDTH_PX = 60;
 const TOGGLE_HEIGHT_PX = 60;

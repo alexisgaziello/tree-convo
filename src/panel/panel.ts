@@ -1,19 +1,13 @@
-import { APP_IDS, APP_PREFIX } from '../constants';
+import { APP_IDS, APP_PREFIX, PANEL_TOP_VH, PANEL_WIDTH_VW, PANEL_HEIGHT_VH } from '../constants';
 import { setupPanelAnimation } from './animation';
 import { createButton } from './button';
 
-const PANEL_MARGIN_VH = 10;
 const PANEL_FADE_VH = 10;
-const PANEL_WIDTH_VW = 15;
 const PANEL_PADDING_PX = 16;
 const PANEL_TOP_PADDING_PX = 56;
 
-function getPanelHeightVh(): number {
-  return 100 - PANEL_MARGIN_VH * 2;
-}
-
 function getFadePercent(valueVh: number): number {
-  return (valueVh / getPanelHeightVh()) * 100;
+  return (valueVh / PANEL_HEIGHT_VH) * 100;
 }
 
 function getPanelMaskImage(): string {
@@ -34,10 +28,10 @@ export function createPanel(): void {
 
   Object.assign(panel.style, {
     position: 'fixed',
-    top: `${PANEL_MARGIN_VH}vh`,
+    top: `${PANEL_TOP_VH}vh`,
     right: '0',
     width: `${PANEL_WIDTH_VW}vw`,
-    height: `${getPanelHeightVh()}vh`,
+    height: `${PANEL_HEIGHT_VH}vh`,
     background: 'transparent',
     zIndex: '100000',
     display: 'none',
