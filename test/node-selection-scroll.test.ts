@@ -24,6 +24,7 @@ describe('node selection scrolling integration', () => {
     Object.assign(globalThis, {
       window: dom.window,
       document: dom.window.document,
+      HTMLElement: dom.window.HTMLElement,
       MutationObserver: dom.window.MutationObserver,
       CustomEvent: dom.window.CustomEvent,
     });

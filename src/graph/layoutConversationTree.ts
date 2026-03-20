@@ -13,15 +13,17 @@ export interface ConversationTreeLayoutOptions {
   nodeGapX?: number;
   startX?: number;
   startY?: number;
+  zigzagOffsetX?: number;
 }
 
 export function layoutConversationTree(
   root: Node,
   {
-    levelGapY = 120,
-    nodeGapX = 32,
+    levelGapY = 56,
+    nodeGapX = 24,
     startX = 56,
     startY = 72,
+    zigzagOffsetX = 12,
   }: ConversationTreeLayoutOptions = {}
 ): void {
   const layoutRoot = hierarchy(root, (node: Node) => node.children);
@@ -38,7 +40,8 @@ export function layoutConversationTree(
   const offsetX = startX - minX;
 
   layoutRoot.each((entry: LayoutEntry) => {
-    entry.data.x = entry.x + offsetX;
+    const zigzag = entry.data.isAgent() ? -zigzagOffsetX : zigzagOffsetX;
+    entry.data.x = entry.x + offsetX + zigzag;
     entry.data.y = entry.y + startY;
     entry.data.depth = entry.depth;
   });

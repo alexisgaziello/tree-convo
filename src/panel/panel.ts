@@ -69,6 +69,7 @@ export function createPanel(): void {
     } else {
       await animation.open();
       isOpen = true;
+      panel.dispatchEvent(new Event('panel-opened'));
     }
 
     isAnimating = false;

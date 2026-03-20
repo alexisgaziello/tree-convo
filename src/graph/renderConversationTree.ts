@@ -1,6 +1,7 @@
 import { Node } from './Node';
 import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
+import { currentTheme } from '../theme';
 import { TREE_CONVO_NODE_SELECT_EVENT } from '../events';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -9,10 +10,8 @@ const MIN_CANVAS_WIDTH = 240;
 const MIN_CANVAS_HEIGHT = 240;
 const CANVAS_PADDING_X = 64;
 const CANVAS_PADDING_Y = 96;
-const EDGE_STROKE = 'rgba(148,163,184,0.45)';
 const LABEL_OFFSET_X = 16;
 const LABEL_FONT_SIZE = 11;
-const LABEL_FILL = 'rgba(226,232,240,0.92)';
 const LABEL_MAX_LENGTH = 28;
 
 function getNodeLabel(node: Node): string {
@@ -88,6 +87,7 @@ function appendGlowFilter(svg: SVGSVGElement): void {
 }
 
 function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
+  const edgeStroke = currentTheme === 'dark' ? 'rgba(148,163,184,0.45)' : 'rgba(100,116,139,0.5)';
   const path = document.createElementNS(SVG_NS, 'path');
   const midY = edge.from.y + (edge.to.y - edge.from.y) / 2;
 
@@ -96,7 +96,7 @@ function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
     `M ${edge.from.x} ${edge.from.y} C ${edge.from.x} ${midY}, ${edge.to.x} ${midY}, ${edge.to.x} ${edge.to.y}`
   );
   path.setAttribute('fill', 'none');
-  path.setAttribute('stroke', EDGE_STROKE);
+  path.setAttribute('stroke', edgeStroke);
   path.setAttribute('stroke-width', '2.5');
   path.setAttribute('stroke-linecap', 'round');
   svg.appendChild(path);
@@ -133,7 +133,8 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
   const label = document.createElementNS(SVG_NS, 'text');
   label.setAttribute('x', String(node.x + LABEL_OFFSET_X));
   label.setAttribute('y', String(node.y + 4));
-  label.setAttribute('fill', LABEL_FILL);
+  const labelFill = currentTheme === 'dark' ? 'rgba(226,232,240,0.92)' : 'rgba(30,41,59,0.9)';
+  label.setAttribute('fill', labelFill);
   label.setAttribute('font-size', String(LABEL_FONT_SIZE));
   label.setAttribute('font-family', 'system-ui, sans-serif');
   label.setAttribute('pointer-events', 'none');
