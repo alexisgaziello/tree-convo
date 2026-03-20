@@ -15,5 +15,6 @@ export interface DomTurnSnapshot {
 
 export interface DomConversationSnapshot {
   turns: DomTurnSnapshot[];
+  isStreaming: boolean;
   capturedAt: number;
 }

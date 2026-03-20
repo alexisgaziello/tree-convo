@@ -20,6 +20,7 @@ export function createTurn(overrides: Partial<DomTurnSnapshot> = {}): DomTurnSna
 export function createSnapshot(turns: DomTurnSnapshot[]): DomConversationSnapshot {
   return {
     turns,
+    isStreaming: false,
     capturedAt: 1,
   };
 }

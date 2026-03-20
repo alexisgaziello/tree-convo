@@ -41,19 +41,6 @@ function centerConversationNode(nodeId: string): void {
   });
 }
 
-function logTreeNodes(): void {
-  // Debug logging removed for production
-}
-
-function getSnapshotSignature(): string {
-  const snapshot = store.getSnapshot();
-
-  return Object.values(snapshot.nodes)
-    .map((node) => `${node.id}:${node.type}:${node.children.join(',')}`)
-    .sort()
-    .join('|');
-}
-
 function renderFromDom(): void {
   if (!canvas) {
     return;
@@ -67,14 +54,17 @@ function renderFromDom(): void {
 
   store.update(snapshot);
 
-  const nextSignature = getSnapshotSignature();
+  if (snapshot.isStreaming) {
+    return;
+  }
+
+  const nextSignature = store.signature();
 
   if (nextSignature === lastRenderedSignature) {
     return;
   }
 
   lastRenderedSignature = nextSignature;
-  logTreeNodes();
 
   const input = store.toConversationNodeInput();
 
@@ -84,6 +74,7 @@ function renderFromDom(): void {
 
   const root = buildTree(input);
   renderConversationTree(root, canvas);
+  if (scrollContainer) syncTreeScroll(scrollContainer);
 }
 
 let renderTimeout: number | null = null;
@@ -133,9 +124,9 @@ function syncTreeScroll(container: Element): void {
   const { scrollTop, scrollHeight, clientHeight } = container;
   const maxScroll = scrollHeight - clientHeight;
   if (maxScroll <= 0) return;
-  const ratio = scrollTop / maxScroll;
+  const ratio = Math.min(scrollTop / maxScroll, 1);
   const treeMax = canvas.scrollHeight - canvas.clientHeight;
-  canvas.scrollTop = ratio * treeMax;
+  if (treeMax > 0) canvas.scrollTop = ratio * treeMax;
   highlightActiveNode(ratio);
 }
 

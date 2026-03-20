@@ -87,9 +87,12 @@ export function extractConversationSnapshot(
   root: ParentNode = document
 ): DomConversationSnapshot {
   const turns = getTurnElements(root).map(extractTurn);
+  const isStreaming = root.querySelector?.('button[aria-label="Stop generating"]') !== null
+    || root.querySelector?.('[data-testid="stop-button"]') !== null;
 
   return {
     turns,
+    isStreaming,
     capturedAt: Date.now(),
   };
 }

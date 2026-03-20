@@ -23,10 +23,6 @@ function toNodeType(role: DomTurnSnapshot['role']): 'user' | 'agent' {
   return role === 'assistant' ? 'agent' : 'user';
 }
 
-function getStableId(turn: DomTurnSnapshot): string {
-  return turn.messageId ?? turn.turnId;
-}
-
 function toMetadata(turn: DomTurnSnapshot): Record<string, unknown> {
   return {
     turnId: turn.turnId,
@@ -46,7 +42,7 @@ function createStoredNode(
   parentId: string | null
 ): StoredNode {
   return {
-    id: getStableId(turn),
+    id: turn.turnId,
     type: toNodeType(turn.role),
     text: turn.text,
     metadata: toMetadata(turn),
@@ -58,9 +54,7 @@ function createStoredNode(
 function turnsEqual(a: DomTurnSnapshot, b: DomTurnSnapshot): boolean {
   return (
     a.turnId === b.turnId &&
-    a.messageId === b.messageId &&
-    a.role === b.role &&
-    a.text === b.text
+    a.role === b.role
   );
 }
 
@@ -101,13 +95,22 @@ export class DomTreeStore {
     let parentId: string | null = null;
 
     if (divergenceIndex > 0) {
-      parentId = getStableId(snapshot.turns[divergenceIndex - 1]);
+      parentId = snapshot.turns[divergenceIndex - 1].turnId;
     }
 
-    for (let index = divergenceIndex; index < snapshot.turns.length; index += 1) {
+    for (let index = 0; index < snapshot.turns.length; index += 1) {
       const turn = snapshot.turns[index];
-      const nodeId = getStableId(turn);
+      const nodeId = turn.turnId;
       const existingNode = this.state.nodes[nodeId];
+
+      if (index < divergenceIndex) {
+        if (existingNode) {
+          existingNode.text = turn.text;
+          existingNode.metadata = toMetadata(turn);
+        }
+        parentId = nodeId;
+        continue;
+      }
 
       if (!existingNode) {
         this.state.nodes[nodeId] = createStoredNode(turn, parentId);
@@ -132,6 +135,13 @@ export class DomTreeStore {
 
     this.state.lastSnapshot = snapshot;
     return this.getSnapshot();
+  }
+
+  signature(): string {
+    return Object.values(this.state.nodes)
+      .map((n) => `${n.id}:${n.type}:${n.text}:${n.children.join(',')}`)
+      .sort()
+      .join('|');
   }
 
   toConversationNodeInput(): ConversationNodeInput | null {
