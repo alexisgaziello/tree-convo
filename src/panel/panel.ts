@@ -1,4 +1,4 @@
-import { APP_IDS } from '../constants';
+import { APP_IDS, APP_PREFIX } from '../constants';
 import { setupPanelAnimation } from './animation';
 import { createButton } from './button';
 
@@ -52,6 +52,15 @@ export function createPanel(): void {
     webkitMaskImage: getPanelMaskImage(),
   });
 
+  const STORAGE_KEY = `${APP_PREFIX}:panel-open`;
+
+  function storageGet(): string | null {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  }
+  function storageSet(v: string): void {
+    try { localStorage.setItem(STORAGE_KEY, v); } catch { /* noop */ }
+  }
+
   const animation = setupPanelAnimation(panel);
   let isOpen = false;
   let isAnimating = false;
@@ -69,13 +78,18 @@ export function createPanel(): void {
     } else {
       await animation.open();
       isOpen = true;
-      panel.dispatchEvent(new Event('panel-opened'));
+      panel.dispatchEvent(new Event(`${APP_PREFIX}:panel-opened`));
     }
 
+    storageSet(String(isOpen));
     isAnimating = false;
   }
 
   createButton(togglePanel);
 
   document.body.appendChild(panel);
+
+  if (storageGet() !== 'false') {
+    togglePanel();
+  }
 }

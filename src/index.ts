@@ -1,4 +1,4 @@
-export { APP_IDS } from './constants';
+export { APP_IDS, APP_PREFIX } from './constants';
 export { createPanel } from './panel/panel';
 export { buildTreeFromSnapshot, DomTreeStore, extractConversationSnapshot } from './dom';
 export { buildTree, renderConversationTree } from './graph';

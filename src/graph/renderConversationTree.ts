@@ -104,10 +104,12 @@ function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
 
 function appendNode(svg: SVGSVGElement, node: Node): void {
   const group = document.createElementNS(SVG_NS, 'g');
-  const roleColor = node.isUser() ? '#60a5fa' : '#22c55e';
+  const roleColor = node.isUser()
+    ? '#64748b'
+    : currentTheme === 'dark' ? '#e2e8f0' : '#334155';
   const roleGlow = node.isUser()
-    ? 'rgba(96,165,250,0.35)'
-    : 'rgba(34,197,94,0.5)';
+    ? 'rgba(100,116,139,0.3)'
+    : currentTheme === 'dark' ? 'rgba(226,232,240,0.25)' : 'rgba(51,65,85,0.25)';
   const title = document.createElementNS(SVG_NS, 'title');
   title.textContent = `${node.type}: ${node.id}`;
 
@@ -119,7 +121,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
   halo.setAttribute('cy', String(node.y));
   halo.setAttribute('r', String(node.isUser() ? NODE_RADIUS + 5 : NODE_RADIUS + 6));
   halo.setAttribute('fill', roleGlow);
-  halo.setAttribute('opacity', node.isUser() ? '0.45' : '0.65');
+  halo.setAttribute('opacity', '0');
 
   const circle = document.createElementNS(SVG_NS, 'circle');
   circle.setAttribute('cx', String(node.x));

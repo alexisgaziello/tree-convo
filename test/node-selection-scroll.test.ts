@@ -27,6 +27,8 @@ describe('node selection scrolling integration', () => {
       HTMLElement: dom.window.HTMLElement,
       MutationObserver: dom.window.MutationObserver,
       CustomEvent: dom.window.CustomEvent,
+      requestAnimationFrame: (cb: FrameRequestCallback) => setTimeout(cb, 0),
+      localStorage: { getItem: () => 'false', setItem: () => {} },
     });
 
     const target = dom.window.document.querySelector('section[data-turn-id="a1"]');

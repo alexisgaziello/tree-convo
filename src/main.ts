@@ -1,6 +1,7 @@
 import {
   buildTree,
   APP_IDS,
+  APP_PREFIX,
   createPanel,
   DomTreeStore,
   extractConversationSnapshot,
@@ -45,10 +46,10 @@ function logTreeNodes(): void {
   const snapshot = store.getSnapshot();
   const nodes = Object.values(snapshot.nodes);
 
-  console.log('[tree-convo] nodes', nodes.length);
+  console.log(`[${APP_PREFIX}] nodes`, nodes.length);
 
   for (const node of nodes) {
-    console.log('[tree-convo] node', node.id, node.type);
+    console.log(`[${APP_PREFIX}] node`, node.id, node.type);
   }
 }
 
@@ -107,7 +108,7 @@ function scheduleRender(): void {
 
 renderFromDom();
 
-const ACTIVE_CLASS = 'tree-convo-active';
+const ACTIVE_CLASS = `${APP_PREFIX}-active`;
 const TREE_NODE_RADIUS = 8;
 
 function highlightActiveNode(ratio: number): void {
@@ -116,15 +117,18 @@ function highlightActiveNode(ratio: number): void {
   if (groups.length === 0) return;
   const idx = Math.round(ratio * (groups.length - 1));
   for (let i = 0; i < groups.length; i++) {
+    const halo = groups[i].querySelector('circle:nth-child(1)') as SVGCircleElement | null;
     const circle = groups[i].querySelector('circle:nth-child(2)') as SVGCircleElement | null;
-    if (!circle) continue;
+    if (!circle || !halo) continue;
     if (i === idx) {
       circle.setAttribute('stroke-width', '4');
       circle.setAttribute('r', String(TREE_NODE_RADIUS + 2));
+      halo.setAttribute('opacity', '0.55');
       groups[i].classList.add(ACTIVE_CLASS);
     } else if (groups[i].classList.contains(ACTIVE_CLASS)) {
       circle.setAttribute('stroke-width', '2');
       circle.setAttribute('r', String(TREE_NODE_RADIUS));
+      halo.setAttribute('opacity', '0');
       groups[i].classList.remove(ACTIVE_CLASS);
     }
   }
@@ -162,7 +166,7 @@ if (scrollContainer) {
 }
 
 if (canvas) {
-  canvas.addEventListener('panel-opened', () => {
+  canvas.addEventListener(`${APP_PREFIX}:panel-opened`, () => {
     if (scrollContainer) syncTreeScroll(scrollContainer);
   });
 }
