@@ -1,6 +1,7 @@
 import { Node } from './Node';
 import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
+import { TREE_CONVO_NODE_SELECT_EVENT } from '../events';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const NODE_RADIUS = 8;
@@ -9,6 +10,20 @@ const MIN_CANVAS_HEIGHT = 240;
 const CANVAS_PADDING_X = 64;
 const CANVAS_PADDING_Y = 96;
 const EDGE_STROKE = 'rgba(148,163,184,0.45)';
+const LABEL_OFFSET_X = 16;
+const LABEL_FONT_SIZE = 11;
+const LABEL_FILL = 'rgba(226,232,240,0.92)';
+const LABEL_MAX_LENGTH = 28;
+
+function getNodeLabel(node: Node): string {
+  const compactText = node.text.replace(/\s+/g, ' ').trim();
+
+  if (compactText.length <= LABEL_MAX_LENGTH) {
+    return compactText;
+  }
+
+  return `${compactText.slice(0, LABEL_MAX_LENGTH).trimEnd()}…`;
+}
 
 function collectGraph(root: Node): {
   nodes: Node[];
@@ -89,17 +104,22 @@ function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
 
 function appendNode(svg: SVGSVGElement, node: Node): void {
   const group = document.createElementNS(SVG_NS, 'g');
-  const roleColor = node.isUser() ? '#60a5fa' : '#4ade80';
+  const roleColor = node.isUser() ? '#60a5fa' : '#22c55e';
   const roleGlow = node.isUser()
     ? 'rgba(96,165,250,0.35)'
-    : 'rgba(74,222,128,0.35)';
+    : 'rgba(34,197,94,0.5)';
+  const title = document.createElementNS(SVG_NS, 'title');
+  title.textContent = `${node.type}: ${node.id}`;
+
+  group.style.cursor = 'pointer';
+  group.dataset.nodeId = node.id;
 
   const halo = document.createElementNS(SVG_NS, 'circle');
   halo.setAttribute('cx', String(node.x));
   halo.setAttribute('cy', String(node.y));
-  halo.setAttribute('r', String(NODE_RADIUS + 5));
+  halo.setAttribute('r', String(node.isUser() ? NODE_RADIUS + 5 : NODE_RADIUS + 6));
   halo.setAttribute('fill', roleGlow);
-  halo.setAttribute('opacity', '0.45');
+  halo.setAttribute('opacity', node.isUser() ? '0.45' : '0.65');
 
   const circle = document.createElementNS(SVG_NS, 'circle');
   circle.setAttribute('cx', String(node.x));
@@ -110,8 +130,31 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
   circle.setAttribute('stroke-width', '2');
   circle.setAttribute('filter', 'url(#chat-tree-node-glow)');
 
+  const label = document.createElementNS(SVG_NS, 'text');
+  label.setAttribute('x', String(node.x + LABEL_OFFSET_X));
+  label.setAttribute('y', String(node.y + 4));
+  label.setAttribute('fill', LABEL_FILL);
+  label.setAttribute('font-size', String(LABEL_FONT_SIZE));
+  label.setAttribute('font-family', 'system-ui, sans-serif');
+  label.setAttribute('pointer-events', 'none');
+  label.textContent = getNodeLabel(node);
+
+  group.appendChild(title);
   group.appendChild(halo);
   group.appendChild(circle);
+  group.appendChild(label);
+
+  group.addEventListener('click', () => {
+    window.dispatchEvent(
+      new CustomEvent(TREE_CONVO_NODE_SELECT_EVENT, {
+        detail: {
+          nodeId: node.id,
+          metadata: node.metadata,
+        },
+      })
+    );
+  });
+
   svg.appendChild(group);
 }
 
@@ -124,6 +167,9 @@ export function renderConversationTree(
   layoutConversationTree(root);
 
   const { nodes, edges } = collectGraph(root);
+  if (nodes.length === 0) {
+    return;
+  }
   const minGraphX = Math.min(...nodes.map((node) => node.x - (NODE_RADIUS + 5)));
   const maxGraphX = Math.max(...nodes.map((node) => node.x + (NODE_RADIUS + 5)));
   const minGraphY = Math.min(...nodes.map((node) => node.y - (NODE_RADIUS + 5)));

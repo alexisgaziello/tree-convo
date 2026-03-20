@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "build:watch": "vite build --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts"
   },
   "keywords": [
     "tampermonkey",
@@ -29,7 +31,9 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.1",
-    "vite-plugin-monkey": "^7.1.9"
+    "vite-plugin-monkey": "^7.1.9",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "d3-hierarchy": "^3.1.2"
