@@ -7,6 +7,7 @@ interface StoredNode {
   id: string;
   type: NodeType;
   text: string;
+  finalized: boolean;
   metadata: Record<string, unknown>;
   children: string[];
   parentId: string | null;
@@ -39,12 +40,14 @@ function toMetadata(turn: DomTurnSnapshot): Record<string, unknown> {
 
 function createStoredNode(
   turn: DomTurnSnapshot,
-  parentId: string | null
+  parentId: string | null,
+  finalized: boolean = false
 ): StoredNode {
   return {
     id: turn.turnId,
     type: toNodeType(turn.role),
     text: turn.text,
+    finalized,
     metadata: toMetadata(turn),
     children: [],
     parentId,
@@ -111,21 +114,25 @@ export class DomTreeStore {
       const turn = snapshot.turns[index];
       const nodeId = turn.turnId;
       const existingNode = this.state.nodes[nodeId];
+      const isLast = index === snapshot.turns.length - 1;
+      const isFinal = !(isLast && snapshot.isStreaming);
 
       if (index < divergenceIndex) {
-        if (existingNode) {
+        if (existingNode && !existingNode.finalized) {
           existingNode.text = turn.text;
           existingNode.metadata = toMetadata(turn);
+          existingNode.finalized = isFinal;
         }
         parentId = nodeId;
         continue;
       }
 
       if (!existingNode) {
-        this.state.nodes[nodeId] = createStoredNode(turn, parentId);
-      } else {
+        this.state.nodes[nodeId] = createStoredNode(turn, parentId, isFinal);
+      } else if (!existingNode.finalized) {
         existingNode.text = turn.text;
         existingNode.metadata = toMetadata(turn);
+        existingNode.finalized = isFinal;
         existingNode.parentId = existingNode.parentId ?? parentId;
       }
 
