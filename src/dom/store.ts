@@ -85,6 +85,15 @@ export class DomTreeStore {
     lastSnapshot: null,
   };
 
+  reset(): void {
+    this.state = {
+      rootIds: [],
+      currentLeafId: null,
+      nodes: {},
+      lastSnapshot: null,
+    };
+  }
+
   update(snapshot: DomConversationSnapshot): DomTreeStoreSnapshot {
     if (snapshot.turns.length === 0) {
       this.state.lastSnapshot = snapshot;

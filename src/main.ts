@@ -19,6 +19,21 @@ createPanel();
 const canvas = document.getElementById(APP_IDS.panel);
 const store = new DomTreeStore();
 let lastRenderedSignature = '';
+let lastUrl = location.href;
+
+function resetForNewChat(): void {
+  store.reset();
+  lastRenderedSignature = '';
+  if (canvas) canvas.innerHTML = '';
+  scheduleRender();
+}
+
+function checkUrlChange(): void {
+  if (location.href !== lastUrl) {
+    lastUrl = location.href;
+    resetForNewChat();
+  }
+}
 
 function getTurnElement(nodeId: string): Element | null {
   return (
@@ -89,8 +104,6 @@ function scheduleRender(): void {
   }, 150);
 }
 
-renderFromDom();
-
 const ACTIVE_CLASS = `${APP_PREFIX}-active`;
 const TREE_NODE_RADIUS = 8;
 
@@ -134,6 +147,8 @@ const scrollContainer =
   document.querySelector('[data-scroll-root]') ??
   document.querySelector('main#main');
 
+renderFromDom();
+
 let scrollRaf: number | null = null;
 
 function onConversationScroll(): void {
@@ -170,6 +185,7 @@ const main = document.querySelector('main#main');
 
 if (main) {
   const observer = new MutationObserver(() => {
+    checkUrlChange();
     scheduleRender();
   });
 
@@ -178,3 +194,5 @@ if (main) {
     subtree: true,
   });
 }
+
+window.addEventListener('popstate', checkUrlChange);
