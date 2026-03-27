@@ -1,4 +1,4 @@
-import type { ConversationNodeInput } from '../graph/conversationSchema';
+import type { ConversationNodeInput } from '../../src/graph/conversationSchema';
 
 export const sampleConversationTree: ConversationNodeInput = {
   id: 'root',
