@@ -2,58 +2,50 @@ import { parseConversationResponse } from './parseConversationResponse';
 import type { ConversationNodeInput } from '../graph/conversationSchema';
 
 let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
 
-function getAccessToken(): Promise<string | null> {
-  if (cachedToken) return Promise.resolve(cachedToken);
-  return fetch('/api/auth/session', { credentials: 'include' })
-    .then((r) => r.json())
-    .then((data) => {
-      cachedToken = data?.accessToken ?? null;
-      return cachedToken;
-    })
-    .catch(() => null);
+async function getAccessToken(): Promise<string | null> {
+  if (cachedToken && Date.now() < tokenExpiresAt) return cachedToken;
+  try {
+    const res = await fetch('/api/auth/session', { credentials: 'include' });
+    const data = await res.json();
+    cachedToken = data?.accessToken ?? null;
+    const expires: string | undefined = data?.expires;
+    tokenExpiresAt = expires ? new Date(expires).getTime() : 0;
+    return cachedToken;
+  } catch {
+    return null;
+  }
 }
 
-export function fetchConversationTree(
+export async function fetchConversationTree(
   conversationId: string
 ): Promise<ConversationNodeInput | null> {
-  return getAccessToken().then((token) => {
+  try {
+    const token = await getAccessToken();
     if (!token) {
-      console.debug('[tree-convo] no access token');
+      console.error('[tree-convo] no access token');
       return null;
     }
-    return fetch(`/backend-api/conversation/${conversationId}`, {
+
+    const res = await fetch(`/backend-api/conversation/${conversationId}`, {
       credentials: 'include',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-    })
-    .then((res) => {
-      if (!res.ok) {
-        console.debug(`[tree-convo] fetch failed: ${res.status} — /backend-api/conversation/${conversationId}`);
-        return null;
-      }
-      return res.json();
-    })
-    .then((data) => {
-      if (!data) return null;
-      const tree = parseConversationResponse(data);
-      if (tree) {
-        const count = countNodes(tree);
-        console.debug(`[tree-convo] fetched conversation — ${count} nodes`);
-      } else {
-        console.debug('[tree-convo] fetched conversation — parse returned null');
-      }
-      return tree;
-    })
-    .catch((err) => {
-      console.debug('[tree-convo] fetch error', err);
-      return null;
     });
-  });
-}
 
-function countNodes(node: ConversationNodeInput): number {
-  return 1 + (node.children ?? []).reduce((sum, c) => sum + countNodes(c), 0);
+    if (!res.ok) {
+      console.error(`[tree-convo] fetch failed: ${res.status} — /backend-api/conversation/${conversationId}`);
+      return null;
+    }
+
+    const data = await res.json();
+    return parseConversationResponse(data);
+
+  } catch (err) {
+    console.error('[tree-convo] fetch error', err);
+    return null;
+  }
 }
