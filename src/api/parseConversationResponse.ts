@@ -9,6 +9,7 @@ interface ApiContent {
 interface ApiMessage {
   author?: { role?: string };
   content?: ApiContent;
+  metadata?: { is_visually_hidden_from_conversation?: boolean };
 }
 
 interface ApiMappingNode {
@@ -47,6 +48,13 @@ function roleOf(node: ApiMappingNode): ConversationNodeRole | null {
   return null; // skip system/tool nodes
 }
 
+function isVisible(node: ApiMappingNode): boolean {
+  if (!node.message) return false;
+  if (node.message.metadata?.is_visually_hidden_from_conversation) return false;
+  const ct = node.message.content?.content_type;
+  return !ct || ct === 'text';
+}
+
 function textOf(node: ApiMappingNode): string {
   const content = node.message?.content;
   if (!content) return '';
@@ -68,6 +76,8 @@ function collectVisibleNodes(
   for (const childId of node.children ?? []) {
     childInputs.push(...collectVisibleNodes(childId, mapping));
   }
+
+  if (!isVisible(node)) return childInputs;
 
   const role = roleOf(node);
   const text = role ? textOf(node) : '';

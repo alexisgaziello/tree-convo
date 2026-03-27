@@ -13,7 +13,9 @@ export default defineConfig({
         match: [
           'https://chatgpt.com/*',
           'https://chat.openai.com/*'
-        ]
+        ],
+        grant: 'none',
+        'inject-into': 'page',
       }
     })
   ],

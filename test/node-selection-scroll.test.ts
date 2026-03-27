@@ -11,6 +11,7 @@ describe('node selection scrolling integration', () => {
   it('scrolls the matching conversation turn into view when a node is selected', async () => {
     const dom = new JSDOM(`
       <body>
+        <div id="chat-tree-panel"></div>
         <main id="main">
           <section data-turn-id="u1"></section>
           <section data-turn-id="a1"></section>
@@ -43,7 +44,9 @@ describe('node selection scrolling integration', () => {
       configurable: true,
     });
 
-    await import('../src/main');
+    const canvas = dom.window.document.getElementById('chat-tree-panel')!;
+    const { bindScrollAndSelect } = await import('../src/panel/bindScrollAndSelect');
+    bindScrollAndSelect(canvas as unknown as HTMLElement, null);
 
     dom.window.dispatchEvent(
       new dom.window.CustomEvent(NODE_SELECT_EVENT, {
