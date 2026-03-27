@@ -1,7 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TREE_CONVO_NODE_SELECT_EVENT } from '../src/events';
+import { NODE_SELECT_EVENT } from '../src/constants';
 
 describe('node selection scrolling integration', () => {
   afterEach(() => {
@@ -46,7 +46,7 @@ describe('node selection scrolling integration', () => {
     await import('../src/main');
 
     dom.window.dispatchEvent(
-      new dom.window.CustomEvent(TREE_CONVO_NODE_SELECT_EVENT, {
+      new dom.window.CustomEvent(NODE_SELECT_EVENT, {
         detail: { nodeId: 'a1', metadata: {} },
       })
     );

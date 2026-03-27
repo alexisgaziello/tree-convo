@@ -1,4 +1,4 @@
-import { APP_IDS, APP_PREFIX, PANEL_TOP_VH, PANEL_WIDTH_VW, PANEL_HEIGHT_VH } from '../constants';
+import { APP_IDS, APP_PREFIX, PANEL_OPENED_EVENT, PANEL_TOP_VH, PANEL_WIDTH_VW, PANEL_HEIGHT_VH } from '../constants';
 import { setupPanelAnimation } from './animation';
 import { createButton } from './button';
 
@@ -72,7 +72,7 @@ export function createPanel(): void {
     } else {
       await animation.open();
       isOpen = true;
-      panel.dispatchEvent(new Event(`${APP_PREFIX}:panel-opened`));
+      panel.dispatchEvent(new Event(PANEL_OPENED_EVENT));
     }
 
     storageSet(String(isOpen));

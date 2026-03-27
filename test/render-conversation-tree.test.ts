@@ -1,7 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 
-import { TREE_CONVO_NODE_SELECT_EVENT } from '../src/events';
+import { NODE_SELECT_EVENT } from '../src/constants';
 import { buildTree } from '../src/graph/buildTree';
 import { renderConversationTree } from '../src/graph/renderConversationTree';
 
@@ -40,7 +40,7 @@ describe('renderConversationTree', () => {
 
     let selectedNodeId: string | null = null;
 
-    window.addEventListener(TREE_CONVO_NODE_SELECT_EVENT, (event: Event) => {
+    window.addEventListener(NODE_SELECT_EVENT, (event: Event) => {
       selectedNodeId = (event as CustomEvent<{ nodeId: string }>).detail.nodeId;
     });
 

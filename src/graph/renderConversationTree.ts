@@ -2,10 +2,9 @@ import { Node } from './Node';
 import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
 import { currentTheme } from '../theme';
-import { TREE_CONVO_NODE_SELECT_EVENT } from '../events';
+import { NODE_SELECT_EVENT, NODE_RADIUS } from '../constants';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const NODE_RADIUS = 8;
 const MIN_CANVAS_WIDTH = 240;
 const MIN_CANVAS_HEIGHT = 240;
 const CANVAS_PADDING_X = 64;
@@ -149,7 +148,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
 
   group.addEventListener('click', () => {
     window.dispatchEvent(
-      new CustomEvent(TREE_CONVO_NODE_SELECT_EVENT, {
+      new CustomEvent(NODE_SELECT_EVENT, {
         detail: {
           nodeId: node.id,
           metadata: node.metadata,
