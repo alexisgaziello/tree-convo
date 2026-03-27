@@ -8,11 +8,11 @@ describe('node selection scrolling integration', () => {
     vi.restoreAllMocks();
   });
 
-  it('scrolls the matching conversation turn into view when a node is selected', async () => {
+  it('scrolls so the turn top sits at 1/4 from viewport top', async () => {
     const dom = new JSDOM(`
       <body>
         <div id="chat-tree-panel"></div>
-        <main id="main">
+        <main id="main" style="overflow:auto">
           <section data-turn-id="u1"></section>
           <section data-turn-id="a1"></section>
         </main>
@@ -21,7 +21,7 @@ describe('node selection scrolling integration', () => {
       url: 'https://chatgpt.com/c/test',
     });
 
-    const scrollIntoView = vi.fn();
+    const scrollTo = vi.fn();
     Object.assign(globalThis, {
       window: dom.window,
       document: dom.window.document,
@@ -33,16 +33,23 @@ describe('node selection scrolling integration', () => {
       location: dom.window.location,
     });
 
-    const target = dom.window.document.querySelector('section[data-turn-id="a1"]');
+    const main = dom.window.document.querySelector('main')!;
+    Object.defineProperty(main, 'scrollTo', { value: scrollTo, configurable: true });
+    Object.defineProperty(main, 'scrollTop', { value: 0, configurable: true });
 
-    if (!target) {
-      throw new Error('Missing target section');
-    }
-
-    Object.defineProperty(target, 'scrollIntoView', {
-      value: scrollIntoView,
+    // Stub getBoundingClientRect for main and target
+    Object.defineProperty(main, 'getBoundingClientRect', {
+      value: () => ({ top: 0 }),
       configurable: true,
     });
+    const target = dom.window.document.querySelector('section[data-turn-id="a1"]')!;
+    Object.defineProperty(target, 'getBoundingClientRect', {
+      value: () => ({ top: 400 }),
+      configurable: true,
+    });
+
+    // viewport height
+    Object.defineProperty(dom.window, 'innerHeight', { value: 800, configurable: true });
 
     const canvas = dom.window.document.getElementById('chat-tree-panel')!;
     const { bindScrollAndSelect } = await import('../src/panel/bindScrollAndSelect');
@@ -54,10 +61,7 @@ describe('node selection scrolling integration', () => {
       })
     );
 
-    expect(scrollIntoView).toHaveBeenCalledWith({
-      behavior: 'smooth',
-      block: 'center',
-      inline: 'nearest',
-    });
+    // target top (400) - container top (0) - 0.25 * 800 (200) = 200
+    expect(scrollTo).toHaveBeenCalledWith({ top: 200, behavior: 'smooth' });
   });
 });
