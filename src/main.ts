@@ -12,187 +12,197 @@ import {
   type TreeConvoNodeSelectDetail,
 } from './events';
 import { initTheme } from './theme';
+import { fetchConversationTree } from './api';
+import type { ConversationNodeInput } from './graph/conversationSchema';
 
-initTheme();
-createPanel();
-
-const canvas = document.getElementById(APP_IDS.panel);
-const store = new DomTreeStore();
-let lastRenderedSignature = '';
-let lastUrl = location.href;
-
-function resetForNewChat(): void {
-  store.reset();
-  lastRenderedSignature = '';
-  if (canvas) canvas.innerHTML = '';
-  scheduleRender();
+// --- Everything waits for DOM ---
+function getConversationId(): string | null {
+  const match = location.pathname.match(/\/c\/([0-9a-f-]+)/);
+  return match ? match[1] : null;
 }
 
-function checkUrlChange(): void {
-  if (location.href !== lastUrl) {
-    lastUrl = location.href;
-    resetForNewChat();
-  }
-}
+function boot(): void {
+  initTheme();
+  createPanel();
 
-function getTurnElement(nodeId: string): Element | null {
-  return (
-    document.querySelector(`section[data-turn-id="${nodeId}"]`) ??
-    document.querySelector(`[data-message-id="${nodeId}"]`)
-  );
-}
+  const canvas = document.getElementById(APP_IDS.panel);
+  const store = new DomTreeStore();
+  let lastRenderedSignature = '';
+  let lastUrl = location.href;
+  let apiTree: ConversationNodeInput | null = null;
 
-function centerConversationNode(nodeId: string): void {
-  const element = getTurnElement(nodeId);
+  let scrollContainer: Element | null = null;
 
-  if (!element) {
-    return;
+  function renderTree(input: ConversationNodeInput): void {
+    if (!canvas) return;
+    const root = buildTree(input);
+    renderConversationTree(root, canvas);
+    if (scrollContainer) syncTreeScroll(scrollContainer);
   }
 
-  element.scrollIntoView({
-    behavior: 'smooth',
-    block: 'center',
-    inline: 'nearest',
-  });
-}
-
-function renderFromDom(): void {
-  if (!canvas) {
-    return;
+  function loadFromApi(): void {
+    const id = getConversationId();
+    console.debug(`[tree-convo] loadFromApi — id=${id}, path=${location.pathname}`);
+    if (!id) return;
+    fetchConversationTree(id).then((tree) => {
+      if (tree) {
+        apiTree = tree;
+        lastRenderedSignature = '';
+        renderTree(tree);
+      }
+    });
   }
 
-  const snapshot = extractConversationSnapshot();
+  loadFromApi();
 
-  if (snapshot.turns.length === 0) {
-    return;
+  function resetForNewChat(): void {
+    store.reset();
+    apiTree = null;
+    lastRenderedSignature = '';
+    if (canvas) canvas.innerHTML = '';
+    loadFromApi();
+    scheduleRender();
   }
 
-  store.update(snapshot);
-
-  if (snapshot.isStreaming) {
-    return;
-  }
-
-  const nextSignature = store.signature();
-
-  if (nextSignature === lastRenderedSignature) {
-    return;
-  }
-
-  lastRenderedSignature = nextSignature;
-
-  const input = store.toConversationNodeInput();
-
-  if (!input) {
-    return;
-  }
-
-  const root = buildTree(input);
-  renderConversationTree(root, canvas);
-  if (scrollContainer) syncTreeScroll(scrollContainer);
-}
-
-let renderTimeout: number | null = null;
-
-function scheduleRender(): void {
-  if (renderTimeout !== null) {
-    window.clearTimeout(renderTimeout);
-  }
-
-  renderTimeout = window.setTimeout(() => {
-    renderFromDom();
-  }, 150);
-}
-
-const ACTIVE_CLASS = `${APP_PREFIX}-active`;
-const TREE_NODE_RADIUS = 8;
-
-function highlightActiveNode(ratio: number): void {
-  if (!canvas) return;
-  const groups = canvas.querySelectorAll<SVGGElement>('[data-node-id]');
-  if (groups.length === 0) return;
-  const idx = Math.round(ratio * (groups.length - 1));
-  for (let i = 0; i < groups.length; i++) {
-    const halo = groups[i].querySelector('circle:nth-child(1)') as SVGCircleElement | null;
-    const circle = groups[i].querySelector('circle:nth-child(2)') as SVGCircleElement | null;
-    if (!circle || !halo) continue;
-    if (i === idx) {
-      circle.setAttribute('stroke-width', '4');
-      circle.setAttribute('r', String(TREE_NODE_RADIUS + 2));
-      halo.setAttribute('opacity', '0.55');
-      groups[i].classList.add(ACTIVE_CLASS);
-    } else if (groups[i].classList.contains(ACTIVE_CLASS)) {
-      circle.setAttribute('stroke-width', '2');
-      circle.setAttribute('r', String(TREE_NODE_RADIUS));
-      halo.setAttribute('opacity', '0');
-      groups[i].classList.remove(ACTIVE_CLASS);
+  function checkUrlChange(): void {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      resetForNewChat();
     }
   }
-}
 
-let suppressSync = false;
-
-function syncTreeScroll(container: Element): void {
-  if (!canvas || canvas.offsetHeight === 0) return;
-  const { scrollTop, scrollHeight, clientHeight } = container;
-  const maxScroll = scrollHeight - clientHeight;
-  if (maxScroll <= 0) return;
-  const ratio = Math.min(scrollTop / maxScroll, 1);
-  const treeMax = canvas.scrollHeight - canvas.clientHeight;
-  if (treeMax > 0) canvas.scrollTop = ratio * treeMax;
-  highlightActiveNode(ratio);
-}
-
-const scrollContainer =
-  document.querySelector('[data-scroll-root]') ??
-  document.querySelector('main#main');
-
-renderFromDom();
-
-let scrollRaf: number | null = null;
-
-function onConversationScroll(): void {
-  if (scrollRaf !== null || suppressSync) return;
-  scrollRaf = requestAnimationFrame(() => {
-    scrollRaf = null;
-    if (scrollContainer) syncTreeScroll(scrollContainer);
-  });
-}
-
-if (scrollContainer) {
-  scrollContainer.addEventListener('scroll', onConversationScroll, { passive: true });
-}
-
-if (canvas) {
-  canvas.addEventListener(`${APP_PREFIX}:panel-opened`, () => {
-    if (scrollContainer) syncTreeScroll(scrollContainer);
-  });
-}
-
-window.addEventListener(TREE_CONVO_NODE_SELECT_EVENT, (event: Event) => {
-  const detail = (event as CustomEvent<TreeConvoNodeSelectDetail>).detail;
-
-  if (!detail.nodeId) {
-    return;
+  function getTurnElement(nodeId: string): Element | null {
+    return (
+      document.querySelector(`section[data-turn-id="${nodeId}"]`) ??
+      document.querySelector(`[data-message-id="${nodeId}"]`)
+    );
   }
 
-  suppressSync = true;
-  centerConversationNode(detail.nodeId);
-  setTimeout(() => { suppressSync = false; }, 600);
-});
+  function centerConversationNode(nodeId: string): void {
+    const element = getTurnElement(nodeId);
+    if (!element) return;
+    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  }
 
-const main = document.querySelector('main#main');
+  function renderFromDom(): void {
+    if (!canvas) return;
 
-if (main) {
-  const observer = new MutationObserver(() => {
-    checkUrlChange();
-    scheduleRender();
+    const snapshot = extractConversationSnapshot();
+    console.debug(`[tree-convo] renderFromDom — ${snapshot.turns.length} turns, streaming=${snapshot.isStreaming}`);
+
+    if (snapshot.turns.length === 0 || snapshot.isStreaming) return;
+
+    // If we have an API tree, re-fetch to pick up edits/new branches
+    if (apiTree) {
+      loadFromApi();
+      return;
+    }
+
+    store.update(snapshot);
+
+    const nextSignature = store.signature();
+    if (nextSignature === lastRenderedSignature) return;
+    lastRenderedSignature = nextSignature;
+
+    const input = store.toConversationNodeInput();
+    if (!input) return;
+    renderTree(input);
+  }
+
+  let renderTimeout: number | null = null;
+
+  function scheduleRender(): void {
+    if (renderTimeout !== null) window.clearTimeout(renderTimeout);
+    renderTimeout = window.setTimeout(() => renderFromDom(), 150);
+  }
+
+  const ACTIVE_CLASS = `${APP_PREFIX}-active`;
+  const TREE_NODE_RADIUS = 8;
+
+  function highlightActiveNode(ratio: number): void {
+    if (!canvas) return;
+    const groups = canvas.querySelectorAll<SVGGElement>('[data-node-id]');
+    if (groups.length === 0) return;
+    const idx = Math.round(ratio * (groups.length - 1));
+    for (let i = 0; i < groups.length; i++) {
+      const halo = groups[i].querySelector('circle:nth-child(1)') as SVGCircleElement | null;
+      const circle = groups[i].querySelector('circle:nth-child(2)') as SVGCircleElement | null;
+      if (!circle || !halo) continue;
+      if (i === idx) {
+        circle.setAttribute('stroke-width', '4');
+        circle.setAttribute('r', String(TREE_NODE_RADIUS + 2));
+        halo.setAttribute('opacity', '0.55');
+        groups[i].classList.add(ACTIVE_CLASS);
+      } else if (groups[i].classList.contains(ACTIVE_CLASS)) {
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('r', String(TREE_NODE_RADIUS));
+        halo.setAttribute('opacity', '0');
+        groups[i].classList.remove(ACTIVE_CLASS);
+      }
+    }
+  }
+
+  let suppressSync = false;
+
+  function syncTreeScroll(container: Element): void {
+    if (!canvas || canvas.offsetHeight === 0) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const maxScroll = scrollHeight - clientHeight;
+    if (maxScroll <= 0) return;
+    const ratio = Math.min(scrollTop / maxScroll, 1);
+    const treeMax = canvas.scrollHeight - canvas.clientHeight;
+    if (treeMax > 0) canvas.scrollTop = ratio * treeMax;
+    highlightActiveNode(ratio);
+  }
+
+  scrollContainer =
+    document.querySelector('[data-scroll-root]') ??
+    document.querySelector('main#main');
+
+  renderFromDom();
+
+  let scrollRaf: number | null = null;
+
+  function onConversationScroll(): void {
+    if (scrollRaf !== null || suppressSync) return;
+    scrollRaf = requestAnimationFrame(() => {
+      scrollRaf = null;
+      if (scrollContainer) syncTreeScroll(scrollContainer);
+    });
+  }
+
+  if (scrollContainer) {
+    scrollContainer.addEventListener('scroll', onConversationScroll, { passive: true });
+  }
+
+  if (canvas) {
+    canvas.addEventListener(`${APP_PREFIX}:panel-opened`, () => {
+      if (scrollContainer) syncTreeScroll(scrollContainer);
+    });
+  }
+
+  window.addEventListener(TREE_CONVO_NODE_SELECT_EVENT, (event: Event) => {
+    const detail = (event as CustomEvent<TreeConvoNodeSelectDetail>).detail;
+    if (!detail.nodeId) return;
+    suppressSync = true;
+    centerConversationNode(detail.nodeId);
+    setTimeout(() => { suppressSync = false; }, 600);
   });
 
-  observer.observe(main, {
-    childList: true,
-    subtree: true,
-  });
+  const main = document.querySelector('main#main');
+  if (main) {
+    const observer = new MutationObserver(() => {
+      checkUrlChange();
+      scheduleRender();
+    });
+    observer.observe(main, { childList: true, subtree: true });
+  }
+
+  window.addEventListener('popstate', checkUrlChange);
 }
 
-window.addEventListener('popstate', checkUrlChange);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}

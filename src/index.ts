@@ -4,4 +4,5 @@ export { buildTreeFromSnapshot, DomTreeStore, extractConversationSnapshot } from
 export { buildTree, renderConversationTree } from './graph';
 export { sampleConversationTree } from './fixtures/sampleConversationTree';
 export { currentTheme, initTheme } from './theme';
+export { fetchConversationTree, parseConversationResponse } from './api';
 export type { Theme } from './theme';
