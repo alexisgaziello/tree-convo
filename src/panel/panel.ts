@@ -2,20 +2,54 @@ import { APP_IDS, APP_PREFIX, PANEL_OPENED_EVENT, PANEL_TOP_VH, PANEL_WIDTH_VW, 
 import { setupPanelAnimation } from './animation';
 import { createButton } from './button';
 
-const PANEL_FADE_VH = 10;
 const PANEL_PADDING_PX = 16;
 const PANEL_TOP_PADDING_PX = 56;
+const STORAGE_KEY = `${APP_PREFIX}:panel-open`;
 
-function getFadePercent(valueVh: number): number {
-  return (valueVh / PANEL_HEIGHT_VH) * 100;
+/** CSS mask-image gradient that fades the panel's top and bottom edges to transparent. */
+const PANEL_FADE_PERCENT = (10 / PANEL_HEIGHT_VH) * 100;
+const PANEL_MASK_IMAGE = `linear-gradient(to bottom, transparent 0%, black ${PANEL_FADE_PERCENT}%, black ${100 - PANEL_FADE_PERCENT}%, transparent 100%)`;
+
+function storageGet(): boolean {
+  try { return localStorage.getItem(STORAGE_KEY) !== 'false'; } catch { return true; }
 }
 
-function getPanelMaskImage(): string {
-  const fadePercent = getFadePercent(PANEL_FADE_VH);
-  const solidStart = fadePercent;
-  const solidEnd = 100 - fadePercent;
+function storageSet(v: boolean): void {
+  try { localStorage.setItem(STORAGE_KEY, String(v)); } catch { /* noop */ }
+}
 
-  return `linear-gradient(to bottom, transparent 0%, black ${solidStart}%, black ${solidEnd}%, transparent 100%)`;
+interface PanelState {
+  panel: HTMLElement;
+  animation: ReturnType<typeof setupPanelAnimation>;
+  isOpen: boolean;
+  isAnimating: boolean;
+}
+
+async function openPanel(state: PanelState): Promise<void> {
+  if (state.isAnimating || state.isOpen) return;
+  state.isAnimating = true;
+  await state.animation.open();
+  state.isOpen = true;
+  state.panel.dispatchEvent(new Event(PANEL_OPENED_EVENT));
+  storageSet(true);
+  state.isAnimating = false;
+}
+
+async function closePanel(state: PanelState): Promise<void> {
+  if (state.isAnimating || !state.isOpen) return;
+  state.isAnimating = true;
+  await state.animation.close();
+  state.isOpen = false;
+  storageSet(false);
+  state.isAnimating = false;
+}
+
+async function togglePanel(state: PanelState): Promise<void> {
+  if (state.isOpen) {
+    await closePanel(state);
+  } else {
+    await openPanel(state);
+  }
 }
 
 export function createPanel(): void {
@@ -42,48 +76,22 @@ export function createPanel(): void {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    maskImage: getPanelMaskImage(),
-    webkitMaskImage: getPanelMaskImage(),
+    maskImage: PANEL_MASK_IMAGE,
+    webkitMaskImage: PANEL_MASK_IMAGE,
   });
 
-  const STORAGE_KEY = `${APP_PREFIX}:panel-open`;
+  const state: PanelState = {
+    panel,
+    animation: setupPanelAnimation(panel),
+    isOpen: false,
+    isAnimating: false,
+  };
 
-  function storageGet(): string | null {
-    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
-  }
-  function storageSet(v: string): void {
-    try { localStorage.setItem(STORAGE_KEY, v); } catch { /* noop */ }
-  }
-
-  const animation = setupPanelAnimation(panel);
-  let isOpen = false;
-  let isAnimating = false;
-
-  async function togglePanel(): Promise<void> {
-    if (isAnimating) {
-      return;
-    }
-
-    isAnimating = true;
-
-    if (isOpen) {
-      await animation.close();
-      isOpen = false;
-    } else {
-      await animation.open();
-      isOpen = true;
-      panel.dispatchEvent(new Event(PANEL_OPENED_EVENT));
-    }
-
-    storageSet(String(isOpen));
-    isAnimating = false;
-  }
-
-  createButton(togglePanel);
+  createButton(() => togglePanel(state));
 
   document.body.appendChild(panel);
 
-  if (storageGet() !== 'false') {
-    togglePanel();
+  if (storageGet()) {
+    openPanel(state);
   }
 }
