@@ -1,4 +1,6 @@
 import { APP_IDS, TOGGLE_TOP_VH } from '../constants';
+import chevronSvg from './icons/chevron.svg?raw';
+import iconSvg from './icons/icon.svg?raw';
 
 const TOGGLE_COLLAPSED_WIDTH_PX = 22;
 const TOGGLE_EXPANDED_WIDTH_PX = 60;
@@ -6,28 +8,6 @@ const TOGGLE_HEIGHT_PX = 60;
 const TOGGLE_PROXIMITY_PX = 140;
 const TOGGLE_VERTICAL_MARGIN_PX = 48;
 const TOGGLE_PRESS_ANIMATION_MS = 180;
-
-function createPeekIcon(): string {
-  return `
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-      <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  `;
-}
-
-function createFullIcon(): string {
-  return `
-    <svg width="44" height="44" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; margin:auto;">
-      <path d="M14 4V8M14 8H7M14 8H14M14 8H21M7 8V14M7 14H5M7 14H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="14" cy="4" r="2.2" fill="currentColor"/>
-      <circle cx="7" cy="8" r="2.2" fill="currentColor"/>
-      <circle cx="14" cy="8" r="2.2" fill="currentColor"/>
-      <circle cx="21" cy="8" r="2.2" fill="currentColor"/>
-      <circle cx="5" cy="14" r="2.2" fill="currentColor"/>
-      <circle cx="9" cy="14" r="2.2" fill="currentColor"/>
-    </svg>
-  `;
-}
 
 function setIconLayerStyles(element: HTMLElement, visible: boolean): void {
   element.style.opacity = visible ? '1' : '0';
@@ -54,10 +34,10 @@ export function createButton(onToggle: () => void): void {
   toggle.id = APP_IDS.panelToggle;
   toggle.innerHTML = `
     <span data-mode="peek" aria-hidden="true" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
-      ${createPeekIcon()}
+      ${chevronSvg}
     </span>
-    <span data-mode="full" aria-hidden="true" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; opacity:0; transform:scale(0.92);">
-      ${createFullIcon()}
+    <span data-mode="full" aria-hidden="true" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
+      ${iconSvg}
     </span>
   `;
   toggle.setAttribute('aria-label', 'Toggle conversation tree');

@@ -22,16 +22,15 @@ export class TreeController {
     this.onRender();
   }
 
-  loadFromApi(): void {
+  async loadFromApi(): Promise<void> {
     const id = getConversationId();
     if (!id) return;
-    fetchConversationTree(id).then((tree) => {
-      if (tree) {
-        this.apiTree = tree;
-        this.lastSignature = '';
-        this.render(tree);
-      }
-    });
+    const tree = await fetchConversationTree(id);
+    if (tree) {
+      this.apiTree = tree;
+      this.lastSignature = '';
+      this.render(tree);
+    }
   }
 
   renderFromDom(): void {
