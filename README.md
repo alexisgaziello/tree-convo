@@ -1,168 +1,97 @@
 # Chat Tree
 
-Chat Tree is a Tampermonkey userscript that adds a visual tree view to ChatGPT conversations, making branch structure visible instead of hiding it behind the default linear UI.
+A browser extension and userscript that visualizes ChatGPT conversation branches as an interactive SVG tree.
 
-The project is designed as a debugging and exploration tool for conversations that fork through edits, regenerations, and alternate response paths. It mounts an SVG-based graph in a right-hand panel so you can inspect the shape of a thread at a glance.
-
-## Why This Exists
-
-ChatGPT conversations can branch, but the product UI mostly shows a single active path. That makes it hard to answer questions like:
-
-- Where did this branch start?
-- Which assistant responses came from the same user prompt?
-- What changed after an edit?
-- How deep is this conversation really?
-
-Chat Tree surfaces that hidden structure as a node-and-edge graph directly inside the ChatGPT page.
+ChatGPT conversations branch through edits, regenerations, and alternate responses — but the UI only shows one path at a time. Chat Tree adds a side panel that renders the full tree structure so you can see every branch at a glance.
 
 ## Features
 
-- Floating `Chat Tree` toggle mounted into the ChatGPT UI
-- Right-side sidebar panel for tree inspection
-- SVG rendering of conversation nodes and edges
-- Visual distinction between roles:
-  - user nodes in blue
-  - assistant nodes in green
-- DOM observer that remounts the UI when ChatGPT rerenders its page shell
-- TypeScript-first codebase with a small, modular rendering pipeline
-- Tree layout powered by `d3-hierarchy` for cleaner top-down branch positioning
-- Tampermonkey-ready build output via Vite and `vite-plugin-monkey`
+- Side panel with SVG tree visualization of the full conversation
+- Active branch highlighting — the current path is emphasized, inactive branches are dimmed
+- Click any node to scroll to that message; click an off-branch node to switch branches automatically
+- Scroll tracking — the tree highlights whichever message is near the top of the viewport
+- Node colors by role (user vs assistant), with a blue halo on the active node
+- Floating toggle button with hover expand animation
+- Dark/light theme support
+- Builds as a Tampermonkey userscript, Chrome extension, or Firefox extension from the same source
 
-## How It Works
-
-The script runs in the ChatGPT web app and adds its own UI layer on top of the existing page:
-
-1. A floating toggle button opens the Chat Tree sidebar.
-2. A fixed right-side panel hosts the visualization canvas.
-3. Conversation data is transformed into a tree of `Node` instances.
-4. A `d3-hierarchy` tree layout pass assigns top-down positions to each node.
-5. The final graph is rendered as SVG.
-
-At a high level, the architecture is organized around the actual Chat Tree responsibilities:
-
-- `src/`
-  Owns the page controls, panel shell, DOM persistence, conversation graph, and fixture data.
-
-## Project Structure
-
-```text
-src/
-  controls/
-    createToggle.ts
-    index.ts
-    styles.ts
-  fixtures/
-    sampleConversationTree.ts
-  graph/
-    buildTree.ts
-    conversationSchema.ts
-    index.ts
-    Node.ts
-    layoutConversationTree.ts
-    renderConversationTree.ts
-  panel/
-    createPanel.ts
-    index.ts
-    styles.ts
-  ui/
-    panelState.ts
-  ids.ts
-  index.ts
-  mountUi.ts
-  observeShell.ts
-  main.ts
-```
-
-## Installation
+## Install
 
 ### Prerequisites
 
 - [pnpm](https://pnpm.io/)
-- [Tampermonkey](https://www.tampermonkey.net/)
-- A Chromium-based browser or Firefox
+- [Tampermonkey](https://www.tampermonkey.net/) (for userscript), or a Chromium/Firefox browser (for extension)
 
-### Local Setup
+### Build
 
 ```bash
 pnpm install
-pnpm build
+pnpm build          # Tampermonkey userscript → dist/tampermonkey/
+pnpm build:chrome   # Chrome extension → dist/chrome/
+pnpm build:firefox  # Firefox extension → dist/firefox/
+pnpm build:all      # All three
 ```
 
-This produces a Tampermonkey-compatible userscript bundle in `dist/`.
+### Tampermonkey
 
-### Install the Userscript
+1. Run `pnpm build`
+2. Open `dist/tampermonkey/tree-convo.user.js`
+3. Tampermonkey will prompt to install it
 
-1. Open the generated `.user.js` file from `dist/`.
-2. Let Tampermonkey install it.
-3. Visit `https://chatgpt.com/` or `https://chat.openai.com/`.
-4. Open any conversation and click the `Chat Tree` button.
+### Chrome
+
+1. Run `pnpm build:chrome`
+2. Go to `chrome://extensions` → enable Developer mode
+3. Click "Load unpacked" → select `dist/chrome/`
+
+### Firefox
+
+1. Run `pnpm build:firefox`
+2. Go to `about:debugging` → "This Firefox"
+3. Click "Load Temporary Add-on" → select `dist/firefox/manifest.json`
 
 ## Development
 
 ```bash
 pnpm install
-pnpm build:watch
+pnpm build:watch    # Rebuild userscript on file changes
+pnpm typecheck      # Type check without emitting
+pnpm test           # Run tests
+pnpm test:watch     # Run tests in watch mode
 ```
 
-Useful commands:
+## How It Works
 
-- `pnpm build` builds the userscript
-- `pnpm build:watch` rebuilds on file changes
-- `pnpm typecheck` runs TypeScript without emitting files
-- `pnpm dev` starts Vite in dev mode
+1. Fetches the full conversation tree from ChatGPT's internal API (`/backend-api/conversation/:id`)
+2. Builds a `Node` tree with parent/child relationships
+3. Computes a top-down layout using `d3-hierarchy`
+4. Renders nodes and edges as SVG in a fixed side panel
+5. Syncs scroll position and highlights the active branch in real time
 
-## Rendering Model
+When you click a node on a different branch, Chat Tree finds the fork point and clicks ChatGPT's branch navigation arrows (`< 1/3 >`) to switch the visible conversation path.
 
-Each conversation turn is represented as a `Node` with:
+## Project Structure
 
-- `id`
-- `type` (`user` or `agent`)
-- `parent`
-- `children`
-- `text`
-- `metadata`
-- layout state (`x`, `y`, `depth`)
-
-The renderer then:
-
-- computes a top-down tree layout with `d3-hierarchy`
-- assigns coordinates for each node based on hierarchy depth and sibling spacing
-- draws edges between parent and child nodes
-- paints nodes by role
-- labels nodes with their identity
-
-## Architecture Notes
-
-The project is intentionally structured so data extraction, layout, and rendering can evolve independently:
-
-- extraction can change without rewriting the renderer
-- layout can improve without changing the UI shell
-- interaction can be layered on top of the existing SVG graph
-
-This keeps the codebase friendly to experimentation, which is useful for a userscript targeting a fast-changing web app.
-
-## ChatGPT DOM Research
-
-The repository includes [`chatgpt_dom_structure_analysis.md`](./chatgpt_dom_structure_analysis.md), which documents the ChatGPT thread structure, stable selectors, and the branch signals used to reconstruct a logical conversation tree from a mostly linear DOM.
-
-## Roadmap
-
-- Extract live conversation data from the ChatGPT DOM instead of sample data
-- Persist branch history across edits and regenerated responses
-- Improve layout quality to reduce overlap in larger trees
-- Click a node to jump to the corresponding message in the page
-- Hover nodes for previews and metadata
-- Highlight the currently active branch
+```
+src/
+  api/                  # API fetch + response parsing
+  dom/                  # DOM selectors, mutation observer, branch navigation
+  graph/                # Node class, tree building, layout, SVG rendering
+  panel/                # Panel UI, button, scroll sync, highlighting
+  constants.ts          # Colors, dimensions, event names
+  boot.ts               # Entry point wiring
+  main.ts               # Bootstrap (DOMContentLoaded guard)
+builds/
+  tampermonkey/         # Vite config + userscript metadata
+  chrome/               # Vite config + MV3 manifest
+  firefox/              # Vite config + MV2 manifest
+  extension.config.ts   # Shared extension build logic
+```
 
 ## Tech Stack
 
-- TypeScript
-- Vite
-- `vite-plugin-monkey`
-- `d3-hierarchy`
-- Tampermonkey
-- SVG for rendering
+TypeScript, Vite, d3-hierarchy, SVG, vite-plugin-monkey
 
 ## License
 
-ISC
+MIT

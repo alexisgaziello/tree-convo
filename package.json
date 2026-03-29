@@ -1,7 +1,7 @@
 {
   "name": "tree-convo",
   "version": "1.0.0",
-  "description": "Tampermonkey userscript for visualizing branched ChatGPT conversations as a tree",
+  "description": "Browser extension and userscript that visualizes ChatGPT conversation branches as an interactive SVG tree",
   "private": true,
   "type": "module",
   "scripts": {
@@ -25,7 +25,7 @@
     "vite"
   ],
   "author": "Alexis Gaziello <alexis.gaziello@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.30.0",
   "devDependencies": {
     "@types/node": "^25.5.0",
