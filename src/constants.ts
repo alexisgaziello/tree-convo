@@ -31,3 +31,13 @@ export const NODE_COLORS = {
 
 /** Fraction of viewport height used as the anchor line for scroll-based node highlighting. */
 export const VIEWPORT_ANCHOR = 0.25;
+
+export const TOGGLE_COLORS = {
+  background: '#111',
+  backgroundFaded: 'rgba(17,17,17,0.9)',
+  text: '#fff',
+  border: 'rgba(255,255,255,0.18)',
+  borderFaded: 'rgba(255,255,255,0.1)',
+  shadowExpanded: '0 6px 20px rgba(0,0,0,0.28)',
+  shadowCollapsed: '0 4px 12px rgba(0,0,0,0.2)',
+} as const;

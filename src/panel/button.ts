@@ -1,4 +1,4 @@
-import { APP_IDS, TOGGLE_TOP_VH } from '../constants';
+import { APP_IDS, TOGGLE_TOP_VH, TOGGLE_COLORS } from '../constants';
 import chevronSvg from './icons/chevron.svg?raw';
 import iconSvg from './icons/icon.svg?raw';
 
@@ -48,11 +48,11 @@ export function createButton(onToggle: () => void): void {
     top: `${TOGGLE_TOP_VH}vh`,
     right: '0',
     zIndex: '100001',
-    border: '1px solid rgba(255,255,255,0.18)',
+    border: `1px solid ${TOGGLE_COLORS.border}`,
     borderRight: '0',
     borderRadius: '10px 0 0 10px',
-    background: '#111',
-    color: '#fff',
+    background: TOGGLE_COLORS.background,
+    color: TOGGLE_COLORS.text,
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -73,13 +73,13 @@ export function createButton(onToggle: () => void): void {
     toggle.style.width = expanded
       ? `${TOGGLE_EXPANDED_WIDTH_PX}px`
       : `${TOGGLE_COLLAPSED_WIDTH_PX}px`;
-    toggle.style.background = expanded ? '#111' : 'rgba(17,17,17,0.9)';
+    toggle.style.background = expanded ? TOGGLE_COLORS.background : TOGGLE_COLORS.backgroundFaded;
     toggle.style.borderColor = expanded
-      ? 'rgba(255,255,255,0.18)'
-      : 'rgba(255,255,255,0.1)';
+      ? TOGGLE_COLORS.border
+      : TOGGLE_COLORS.borderFaded;
     toggle.style.boxShadow = expanded
-      ? '0 6px 20px rgba(0,0,0,0.28)'
-      : '0 4px 12px rgba(0,0,0,0.2)';
+      ? TOGGLE_COLORS.shadowExpanded
+      : TOGGLE_COLORS.shadowCollapsed;
 
     if (peek instanceof HTMLElement) {
       setIconLayerStyles(peek, !expanded);
