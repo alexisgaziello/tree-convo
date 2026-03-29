@@ -2,6 +2,19 @@ import { buildTree, renderConversationTree, DomTreeStore, extractConversationSna
 import { fetchConversationTree } from './api';
 import { getConversationId } from './dom/selectors';
 import type { ConversationNodeInput } from './graph/conversationSchema';
+import { Node } from './graph/Node';
+
+/** Build a flat ID → Node lookup from a tree root. */
+function indexTree(root: Node): Map<string, Node> {
+  const map = new Map<string, Node>();
+  const queue = [root];
+  while (queue.length > 0) {
+    const n = queue.pop()!;
+    map.set(n.id, n);
+    queue.push(...n.children);
+  }
+  return map;
+}
 
 export class TreeController {
   private store = new DomTreeStore();
@@ -11,6 +24,8 @@ export class TreeController {
   private renderTimeout: number | null = null;
   private canvas: HTMLElement;
   private onRender: () => void;
+  /** Flat lookup of all nodes by ID, rebuilt on each render. */
+  nodeIndex: Map<string, Node> = new Map();
 
   constructor(canvas: HTMLElement, onRender: () => void) {
     this.canvas = canvas;
@@ -18,7 +33,9 @@ export class TreeController {
   }
 
   private render(input: ConversationNodeInput): void {
-    renderConversationTree(buildTree(input), this.canvas);
+    const root = buildTree(input);
+    this.nodeIndex = indexTree(root);
+    renderConversationTree(root, this.canvas);
     this.onRender();
   }
 
@@ -67,6 +84,7 @@ export class TreeController {
   reset(): void {
     this.store.reset();
     this.apiTree = null;
+    this.nodeIndex.clear();
     this.lastSignature = '';
     this.canvas.innerHTML = '';
   }

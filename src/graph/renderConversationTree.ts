@@ -3,7 +3,6 @@ import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
 import { currentTheme } from '../theme';
 import { NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../constants';
-import { getActiveNodeId, applyHighlight } from '../panel/activeNode';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MIN_CANVAS_WIDTH = 240;
@@ -99,6 +98,8 @@ function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
   path.setAttribute('stroke', edgeStroke);
   path.setAttribute('stroke-width', '2.5');
   path.setAttribute('stroke-linecap', 'round');
+  path.dataset.fromId = edge.from.id;
+  path.dataset.toId = edge.to.id;
   svg.appendChild(path);
 }
 
@@ -115,6 +116,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
 
   group.style.cursor = 'pointer';
   group.dataset.nodeId = node.id;
+  if (node.parent) group.dataset.parentId = node.parent.id;
 
   const halo = document.createElementNS(SVG_NS, 'circle');
   halo.setAttribute('cx', String(node.x));
@@ -209,10 +211,4 @@ export function renderConversationTree(
   }
 
   container.appendChild(svg);
-
-  // Re-apply active highlight after render.
-  const activeId = getActiveNodeId();
-  if (activeId) {
-    applyHighlight(container, activeId);
-  }
 }

@@ -1,4 +1,4 @@
-import { NODE_COLORS, VIEWPORT_ANCHOR } from '../constants';
+import { VIEWPORT_ANCHOR } from '../constants';
 import { getTurnElement } from '../dom/selectors';
 
 /** Tracks the currently highlighted node ID across renders. */
@@ -27,21 +27,4 @@ export function findAnchorNodeId(canvas: HTMLElement): string | null {
   }
 
   return bestId;
-}
-
-/** Apply the active halo highlight to a node by ID, clearing any previous highlight. */
-export function applyHighlight(canvas: HTMLElement, nodeId: string): void {
-  const prev = canvas.querySelector<SVGCircleElement>('[data-active-node]');
-  if (prev) {
-    prev.setAttribute('opacity', '0');
-    prev.removeAttribute('data-active-node');
-  }
-
-  const group = canvas.querySelector<SVGGElement>(`[data-node-id="${nodeId}"]`);
-  const halo = group?.querySelector('circle:nth-child(2)') as SVGCircleElement | null;
-  if (!halo) return;
-
-  halo.setAttribute('fill', NODE_COLORS.activeHalo);
-  halo.setAttribute('opacity', '1');
-  halo.dataset.activeNode = 'true';
 }

@@ -1,7 +1,10 @@
 import { PANEL_OPENED_EVENT, NODE_SELECT_EVENT, VIEWPORT_ANCHOR, type NodeSelectDetail } from '../constants';
 import { getTurnElement } from '../dom/selectors';
+import { navigateToBranch } from '../dom/navigateToBranch';
 import { syncTreePanel } from './treeTracking';
-import { setActiveNodeId, applyHighlight } from './activeNode';
+import { setActiveNodeId } from './activeNode';
+import { applyBranchHighlight } from './branchHighlight';
+import type { TreeController } from '../TreeController';
 
 /** Scroll so the top of `el` sits at the viewport anchor line. */
 function scrollToAnchor(el: Element): void {
@@ -14,7 +17,11 @@ function scrollToAnchor(el: Element): void {
 }
 
 /** Binds ongoing event listeners for scroll sync and node selection. */
-export function bindScrollAndSelect(canvas: HTMLElement, scrollContainer: Element | null): void {
+export function bindScrollAndSelect(
+  canvas: HTMLElement,
+  scrollContainer: Element | null,
+  controller: TreeController
+): void {
   let scrollRaf: number | null = null;
   // True while a programmatic smooth-scroll is in flight — all scroll events are ignored.
   let scrollLocked = false;
@@ -36,14 +43,20 @@ export function bindScrollAndSelect(canvas: HTMLElement, scrollContainer: Elemen
   });
 
   // When a tree node is clicked, highlight it and scroll ChatGPT's thread to the matching message.
-  window.addEventListener(NODE_SELECT_EVENT, (event: Event) => {
+  window.addEventListener(NODE_SELECT_EVENT, async (event: Event) => {
     const { nodeId } = (event as CustomEvent<NodeSelectDetail>).detail;
     if (!nodeId) return;
 
     setActiveNodeId(nodeId);
-    applyHighlight(canvas, nodeId);
+    applyBranchHighlight(canvas, nodeId);
 
-    const el = getTurnElement(nodeId);
+    // If the node isn't on the current branch, navigate ChatGPT to that branch first.
+    let el = getTurnElement(nodeId);
+    if (!el) {
+      await navigateToBranch(nodeId, controller.nodeIndex);
+      el = getTurnElement(nodeId);
+    }
+
     if (!el) return;
     scrollLocked = true;
     scrollToAnchor(el);
