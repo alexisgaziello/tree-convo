@@ -1,6 +1,6 @@
 import { APP_IDS, TOGGLE_TOP_VH, TOGGLE_COLORS } from '../constants';
-import chevronSvg from './icons/chevron.svg?raw';
-import iconSvg from './icons/icon.svg?raw';
+import chevronSvg from '../../assets/panel/chevron.svg?raw';
+import iconSvg from '../../assets/icons/icon.svg?raw';
 
 const TOGGLE_COLLAPSED_WIDTH_PX = 22;
 const TOGGLE_EXPANDED_WIDTH_PX = 60;

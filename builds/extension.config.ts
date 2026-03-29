@@ -3,6 +3,9 @@ import { resolve, basename } from 'path';
 import { copyFileSync } from 'fs';
 import { baseConfig } from '../vite.config';
 
+const ICONS_DIR = resolve(__dirname, '../assets/icons/generated');
+const ICON_FILES = ['icon-16.png', 'icon-48.png', 'icon-128.png'];
+
 /** Shared extension build config. Each target passes its own dir. */
 export function extensionConfig(buildDir: string): UserConfig {
   const targetName = basename(buildDir);
@@ -23,9 +26,12 @@ export function extensionConfig(buildDir: string): UserConfig {
     },
     plugins: [
       {
-        name: 'copy-manifest',
+        name: 'copy-extension-assets',
         closeBundle() {
           copyFileSync(resolve(buildDir, 'manifest.json'), resolve(outDir, 'manifest.json'));
+          for (const icon of ICON_FILES) {
+            copyFileSync(resolve(ICONS_DIR, icon), resolve(outDir, icon));
+          }
         },
       },
     ],

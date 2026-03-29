@@ -32,11 +32,12 @@
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
     "eslint": "^10.0.3",
+    "jsdom": "^26.1.0",
     "prettier": "^3.8.1",
+    "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^8.0.1",
     "vite-plugin-monkey": "^7.1.9",
-    "jsdom": "^26.1.0",
     "vitest": "^3.2.4"
   },
   "dependencies": {

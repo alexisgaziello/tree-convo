@@ -13,6 +13,7 @@ export default defineConfig(
           namespace: 'chat-tree',
           version: '0.1.0',
           description: 'Tree visualizer for branched ChatGPT conversations',
+        icon: 'https://raw.githubusercontent.com/alexisgaziello/tree-convo/main/assets/icon.svg',
           match: [
             'https://chatgpt.com/*',
             'https://chat.openai.com/*',
