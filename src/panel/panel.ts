@@ -1,4 +1,11 @@
-import { APP_IDS, APP_PREFIX, PANEL_OPENED_EVENT, PANEL_TOP_VH, PANEL_WIDTH_VW, PANEL_HEIGHT_VH } from '../constants';
+import {
+  APP_IDS,
+  APP_PREFIX,
+  PANEL_OPENED_EVENT,
+  PANEL_TOP_VH,
+  PANEL_WIDTH_VW,
+  PANEL_HEIGHT_VH,
+} from '../constants';
 import { setupPanelAnimation } from './animation';
 import { createButton } from './button';
 
@@ -11,11 +18,19 @@ const PANEL_FADE_PERCENT = (10 / PANEL_HEIGHT_VH) * 100;
 const PANEL_MASK_IMAGE = `linear-gradient(to bottom, transparent 0%, black ${PANEL_FADE_PERCENT}%, black ${100 - PANEL_FADE_PERCENT}%, transparent 100%)`;
 
 function storageGet(): boolean {
-  try { return localStorage.getItem(STORAGE_KEY) !== 'false'; } catch { return true; }
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== 'false';
+  } catch {
+    return true;
+  }
 }
 
 function storageSet(v: boolean): void {
-  try { localStorage.setItem(STORAGE_KEY, String(v)); } catch { /* noop */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, String(v));
+  } catch {
+    /* noop */
+  }
 }
 
 interface PanelState {

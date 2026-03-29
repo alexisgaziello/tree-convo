@@ -9,7 +9,7 @@ import { getTurnElement } from './selectors';
  */
 export async function navigateToBranch(
   targetId: string,
-  nodeIndex: Map<string, Node>
+  nodeIndex: Map<string, Node>,
 ): Promise<void> {
   const target = nodeIndex.get(targetId);
   if (!target) return;
@@ -22,9 +22,7 @@ export async function navigateToBranch(
     const parent = current.parent;
     if (parent && parent.children.length > 1) {
       // Check if a different sibling is currently displayed.
-      const displayedSibling = parent.children.find(
-        (c) => c !== current && getTurnElement(c.id)
-      );
+      const displayedSibling = parent.children.find((c) => c !== current && getTurnElement(c.id));
       if (displayedSibling) {
         forkChild = current;
         break;
@@ -48,7 +46,9 @@ export async function navigateToBranch(
   if (!currentEl) return;
 
   const container = currentEl.closest('[data-message-id]') ?? currentEl;
-  const prevBtn = container.querySelector<HTMLButtonElement>('button[aria-label="Previous response"]');
+  const prevBtn = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="Previous response"]',
+  );
   const nextBtn = container.querySelector<HTMLButtonElement>('button[aria-label="Next response"]');
 
   if (!prevBtn && !nextBtn) return;

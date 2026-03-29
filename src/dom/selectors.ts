@@ -6,8 +6,5 @@ export function getTurnElement(nodeId: string): Element | null {
 }
 
 export function getScrollContainer(): Element | null {
-  return (
-    document.querySelector('[data-scroll-root]') ??
-    document.querySelector('main#main')
-  );
+  return document.querySelector('[data-scroll-root]') ?? document.querySelector('main#main');
 }

@@ -83,7 +83,7 @@ function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
 
   path.setAttribute(
     'd',
-    `M ${edge.from.x} ${edge.from.y} C ${edge.from.x} ${midY}, ${edge.to.x} ${midY}, ${edge.to.x} ${edge.to.y}`
+    `M ${edge.from.x} ${edge.from.y} C ${edge.from.x} ${midY}, ${edge.to.x} ${midY}, ${edge.to.x} ${edge.to.y}`,
   );
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke', edgeStroke);
@@ -98,10 +98,14 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
   const group = document.createElementNS(SVG_NS, 'g');
   const roleColor = node.isUser()
     ? NODE_COLORS.user
-    : currentTheme === 'dark' ? NODE_COLORS.agent.dark : NODE_COLORS.agent.light;
+    : currentTheme === 'dark'
+      ? NODE_COLORS.agent.dark
+      : NODE_COLORS.agent.light;
   const roleGlow = node.isUser()
     ? NODE_COLORS.userGlow
-    : currentTheme === 'dark' ? NODE_COLORS.agentGlow.dark : NODE_COLORS.agentGlow.light;
+    : currentTheme === 'dark'
+      ? NODE_COLORS.agentGlow.dark
+      : NODE_COLORS.agentGlow.light;
   const title = document.createElementNS(SVG_NS, 'title');
   title.textContent = `${node.type}: ${node.id}`;
 
@@ -147,17 +151,14 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
           nodeId: node.id,
           metadata: node.metadata,
         },
-      })
+      }),
     );
   });
 
   svg.appendChild(group);
 }
 
-export function renderConversationTree(
-  root: Node,
-  container: HTMLElement
-): void {
+export function renderConversationTree(root: Node, container: HTMLElement): void {
   container.innerHTML = '';
 
   layoutConversationTree(root);
@@ -167,8 +168,10 @@ export function renderConversationTree(
     return;
   }
   const margin = NODE_RADIUS + 6;
-  let minGraphX = Infinity, maxGraphX = -Infinity;
-  let minGraphY = Infinity, maxGraphY = -Infinity;
+  let minGraphX = Infinity,
+    maxGraphX = -Infinity;
+  let minGraphY = Infinity,
+    maxGraphY = -Infinity;
   for (const node of nodes) {
     if (node.x - margin < minGraphX) minGraphX = node.x - margin;
     if (node.x + margin > maxGraphX) maxGraphX = node.x + margin;

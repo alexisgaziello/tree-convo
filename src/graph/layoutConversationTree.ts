@@ -18,7 +18,10 @@ export interface ConversationTreeLayoutOptions {
 }
 
 /** For each node with multiple children, assign a stagger offset based on sibling index. */
-function buildStaggerMap(layoutRoot: { each: (fn: (entry: LayoutEntry) => void) => void }, branchStaggerY: number): Map<Node, number> {
+function buildStaggerMap(
+  layoutRoot: { each: (fn: (entry: LayoutEntry) => void) => void },
+  branchStaggerY: number,
+): Map<Node, number> {
   const staggerMap = new Map<Node, number>();
   layoutRoot.each((entry: LayoutEntry) => {
     const children = entry.data.children;
@@ -51,7 +54,7 @@ export function layoutConversationTree(
     startY = 72,
     zigzagOffsetX = 12,
     branchStaggerY = 20,
-  }: ConversationTreeLayoutOptions = {}
+  }: ConversationTreeLayoutOptions = {},
 ): void {
   const layoutRoot = hierarchy(root, (node: Node) => node.children);
   const treeLayout = tree().nodeSize([nodeGapX, levelGapY]);

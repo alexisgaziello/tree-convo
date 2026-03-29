@@ -11,7 +11,9 @@ export function collectBranchIds(canvas: HTMLElement, nodeId: string): Set<strin
   let current: string | undefined = nodeId;
   while (current) {
     ids.add(current);
-    const parentId: string | undefined = canvas.querySelector<SVGGElement>(`[data-node-id="${current}"]`)?.dataset.parentId;
+    const parentId: string | undefined = canvas.querySelector<SVGGElement>(
+      `[data-node-id="${current}"]`,
+    )?.dataset.parentId;
     current = parentId;
   }
 

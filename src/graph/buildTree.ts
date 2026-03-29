@@ -4,7 +4,7 @@ import type { ConversationNodeInput } from './conversationSchema';
 export function buildTree(
   rawNode: ConversationNodeInput,
   parent: Node | null = null,
-  depth = 0
+  depth = 0,
 ): Node {
   const node = new Node({
     id: rawNode.id,

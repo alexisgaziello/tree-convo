@@ -36,12 +36,8 @@ function setExpanded({ toggle, peek, full }: ToggleElements, expanded: boolean):
     ? `${TOGGLE_EXPANDED_WIDTH_PX}px`
     : `${TOGGLE_COLLAPSED_WIDTH_PX}px`;
   toggle.style.background = expanded ? TOGGLE_COLORS.background : TOGGLE_COLORS.backgroundFaded;
-  toggle.style.borderColor = expanded
-    ? TOGGLE_COLORS.border
-    : TOGGLE_COLORS.borderFaded;
-  toggle.style.boxShadow = expanded
-    ? TOGGLE_COLORS.shadowExpanded
-    : TOGGLE_COLORS.shadowCollapsed;
+  toggle.style.borderColor = expanded ? TOGGLE_COLORS.border : TOGGLE_COLORS.borderFaded;
+  toggle.style.boxShadow = expanded ? TOGGLE_COLORS.shadowExpanded : TOGGLE_COLORS.shadowCollapsed;
 
   if (peek instanceof HTMLElement) {
     setIconLayerStyles(peek, !expanded);

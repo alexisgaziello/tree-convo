@@ -15,7 +15,8 @@ export function interceptConversationFetch(onConversation: ConversationCallback)
   window.fetch = async function (...args: Parameters<typeof fetch>) {
     const res = await originalFetch.apply(this, args);
 
-    const url = typeof args[0] === 'string' ? args[0] : args[0] instanceof Request ? args[0].url : '';
+    const url =
+      typeof args[0] === 'string' ? args[0] : args[0] instanceof Request ? args[0].url : '';
     if (!CONVERSATION_URL_PATTERN.test(url)) return res;
 
     // Extract conversation ID from URL.
@@ -25,10 +26,15 @@ export function interceptConversationFetch(onConversation: ConversationCallback)
 
     // Clone so ChatGPT can still read the original response.
     const clone = res.clone();
-    clone.json().then((data) => {
-      const tree = parseConversationResponse(data);
-      if (tree) onConversation(conversationId, tree);
-    }).catch(() => { /* ignore parse errors */ });
+    clone
+      .json()
+      .then((data) => {
+        const tree = parseConversationResponse(data);
+        if (tree) onConversation(conversationId, tree);
+      })
+      .catch(() => {
+        /* ignore parse errors */
+      });
 
     return res;
   };

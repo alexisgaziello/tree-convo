@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { parseConversationResponse } from '../src/api/parseConversationResponse';
 import { apiConversationFixture } from './fixtures/apiConversationFixture';
+import type { ConversationNodeInput } from '../src/graph/conversationSchema';
 
 describe('parseConversationResponse', () => {
   it('skips system, tool-call, and hidden nodes — returns only visible turns', () => {
-    const tree = parseConversationResponse(apiConversationFixture as any);
+    const tree = parseConversationResponse(apiConversationFixture);
 
     expect(tree).not.toBeNull();
     expect(tree!.id).toBe('u1');
@@ -29,7 +30,7 @@ describe('parseConversationResponse', () => {
   });
 
   it('produces exactly 4 visible nodes from the fixture', () => {
-    const tree = parseConversationResponse(apiConversationFixture as any);
+    const tree = parseConversationResponse(apiConversationFixture);
     const count = countNodes(tree!);
     expect(count).toBe(4);
   });
@@ -39,18 +40,18 @@ describe('parseConversationResponse', () => {
   });
 
   it('returns null for missing mapping', () => {
-    expect(parseConversationResponse({} as any)).toBeNull();
+    expect(parseConversationResponse({})).toBeNull();
   });
 
   it('skips assistant tool-call nodes with content_type code', () => {
-    const tree = parseConversationResponse(apiConversationFixture as any);
+    const tree = parseConversationResponse(apiConversationFixture);
     const ids = collectIds(tree!);
     expect(ids).not.toContain('tool-call');
     expect(ids).not.toContain('tool-call2');
   });
 
   it('skips nodes with is_visually_hidden_from_conversation', () => {
-    const tree = parseConversationResponse(apiConversationFixture as any);
+    const tree = parseConversationResponse(apiConversationFixture);
     const ids = collectIds(tree!);
     expect(ids).not.toContain('sys1');
     expect(ids).not.toContain('sys2');
@@ -62,10 +63,10 @@ describe('parseConversationResponse', () => {
   });
 });
 
-function countNodes(node: { children?: any[] }): number {
-  return 1 + (node.children ?? []).reduce((s: number, c: any) => s + countNodes(c), 0);
+function countNodes(node: ConversationNodeInput): number {
+  return 1 + (node.children ?? []).reduce((s, c) => s + countNodes(c), 0);
 }
 
-function collectIds(node: { id: string; children?: any[] }): string[] {
-  return [node.id, ...(node.children ?? []).flatMap((c: any) => collectIds(c))];
+function collectIds(node: ConversationNodeInput): string[] {
+  return [node.id, ...(node.children ?? []).flatMap((c) => collectIds(c))];
 }

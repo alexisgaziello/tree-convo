@@ -67,7 +67,7 @@ function textOf(node: ApiMappingNode): string {
 /** Returns an array so skipped nodes can splice all children into the parent. */
 function collectVisibleNodes(
   id: string,
-  mapping: Record<string, ApiMappingNode>
+  mapping: Record<string, ApiMappingNode>,
 ): ConversationNodeInput[] {
   const node = mapping[id];
   if (!node) return [];
@@ -89,7 +89,7 @@ function collectVisibleNodes(
 }
 
 export function parseConversationResponse(
-  data: ApiConversationResponse
+  data: ApiConversationResponse,
 ): ConversationNodeInput | null {
   const mapping = data?.mapping;
   if (!mapping) return null;

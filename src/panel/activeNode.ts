@@ -4,8 +4,12 @@ import { getTurnElement } from '../dom/selectors';
 /** Tracks the currently highlighted node ID across renders. */
 let activeId: string | null = null;
 
-export function getActiveNodeId(): string | null { return activeId; }
-export function setActiveNodeId(id: string | null): void { activeId = id; }
+export function getActiveNodeId(): string | null {
+  return activeId;
+}
+export function setActiveNodeId(id: string | null): void {
+  activeId = id;
+}
 
 /** Find the node ID whose DOM message is closest to the viewport anchor line. */
 export function findAnchorNodeId(canvas: HTMLElement): string | null {

@@ -9,7 +9,8 @@ describe('node selection scrolling integration', () => {
   });
 
   it('scrolls so the turn top sits at 1/4 from viewport top', async () => {
-    const dom = new JSDOM(`
+    const dom = new JSDOM(
+      `
       <body>
         <div id="chat-tree-panel"></div>
         <main id="main" style="overflow:auto">
@@ -17,9 +18,11 @@ describe('node selection scrolling integration', () => {
           <section data-turn-id="a1"></section>
         </main>
       </body>
-    `, {
-      url: 'https://chatgpt.com/c/test',
-    });
+    `,
+      {
+        url: 'https://chatgpt.com/c/test',
+      },
+    );
 
     const scrollTo = vi.fn();
     Object.assign(globalThis, {
@@ -58,7 +61,7 @@ describe('node selection scrolling integration', () => {
     dom.window.dispatchEvent(
       new dom.window.CustomEvent(NODE_SELECT_EVENT, {
         detail: { nodeId: 'a1', metadata: {} },
-      })
+      }),
     );
 
     // target top (400) - container top (0) - 0.25 * 800 (200) = 200

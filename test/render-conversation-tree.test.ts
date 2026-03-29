@@ -47,7 +47,7 @@ describe('renderConversationTree', () => {
     renderConversationTree(tree, container);
 
     const labels = Array.from(container.querySelectorAll('text')).map(
-      (element) => element.textContent
+      (element) => element.textContent,
     );
 
     expect(labels[0]).toContain('Hello there');

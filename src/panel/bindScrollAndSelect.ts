@@ -1,4 +1,9 @@
-import { PANEL_OPENED_EVENT, NODE_SELECT_EVENT, VIEWPORT_ANCHOR, type NodeSelectDetail } from '../constants';
+import {
+  PANEL_OPENED_EVENT,
+  NODE_SELECT_EVENT,
+  VIEWPORT_ANCHOR,
+  type NodeSelectDetail,
+} from '../constants';
 import { getTurnElement } from '../dom/selectors';
 import { navigateToBranch } from '../dom/navigateToBranch';
 import { syncTreePanel } from './treeTracking';
@@ -12,7 +17,8 @@ function scrollToAnchor(el: Element): void {
   if (!container) return;
   const elTop = el.getBoundingClientRect().top;
   const containerTop = container.getBoundingClientRect().top;
-  const target = container.scrollTop + (elTop - containerTop) - window.innerHeight * VIEWPORT_ANCHOR;
+  const target =
+    container.scrollTop + (elTop - containerTop) - window.innerHeight * VIEWPORT_ANCHOR;
   container.scrollTo({ top: target, behavior: 'smooth' });
 }
 
@@ -20,7 +26,7 @@ function scrollToAnchor(el: Element): void {
 export function bindScrollAndSelect(
   canvas: HTMLElement,
   scrollContainer: Element | null,
-  controller: TreeController
+  controller: TreeController,
 ): void {
   let scrollRaf: number | null = null;
   // True while a programmatic smooth-scroll is in flight — all scroll events are ignored.
@@ -28,13 +34,17 @@ export function bindScrollAndSelect(
 
   // Sync tree scroll and highlight on user scroll.
   if (scrollContainer) {
-    scrollContainer.addEventListener('scroll', () => {
-      if (scrollRaf !== null || scrollLocked) return;
-      scrollRaf = requestAnimationFrame(() => {
-        scrollRaf = null;
-        syncTreePanel(canvas, scrollContainer);
-      });
-    }, { passive: true });
+    scrollContainer.addEventListener(
+      'scroll',
+      () => {
+        if (scrollRaf !== null || scrollLocked) return;
+        scrollRaf = requestAnimationFrame(() => {
+          scrollRaf = null;
+          syncTreePanel(canvas, scrollContainer);
+        });
+      },
+      { passive: true },
+    );
   }
 
   // Re-sync when the panel is opened (content may have changed while hidden).
@@ -60,6 +70,8 @@ export function bindScrollAndSelect(
     if (!el) return;
     scrollLocked = true;
     scrollToAnchor(el);
-    setTimeout(() => { scrollLocked = false; }, 600);
+    setTimeout(() => {
+      scrollLocked = false;
+    }, 600);
   });
 }

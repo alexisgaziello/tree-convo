@@ -13,6 +13,10 @@
     "build:all": "pnpm build:tampermonkey && pnpm build:chrome && pnpm build:firefox",
     "build:watch": "vite build --watch --config builds/tampermonkey/vite.config.ts",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts' 'test/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts' 'test/**/*.ts'",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts"
   },

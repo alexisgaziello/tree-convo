@@ -31,7 +31,9 @@ export function boot(): void {
   if (!canvas) return;
 
   const scrollContainer = getScrollContainer();
-  const onRender = () => { if (scrollContainer) syncTreePanelAfterRender(canvas, scrollContainer); };
+  const onRender = () => {
+    if (scrollContainer) syncTreePanelAfterRender(canvas, scrollContainer);
+  };
   controller = new TreeController(canvas, onRender);
 
   // Flush any conversations intercepted before the DOM was ready.
