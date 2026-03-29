@@ -52,7 +52,7 @@ function isVisible(node: ApiMappingNode): boolean {
   if (!node.message) return false;
   if (node.message.metadata?.is_visually_hidden_from_conversation) return false;
   const ct = node.message.content?.content_type;
-  return !ct || ct === 'text';
+  return !ct || ct === 'text' || ct === 'multimodal_text';
 }
 
 function textOf(node: ApiMappingNode): string {
@@ -82,7 +82,7 @@ function collectVisibleNodes(
   const role = roleOf(node);
   const text = role ? textOf(node) : '';
 
-  // Skip nodes with no role or no text — pass children through
+  // Skip nodes with no role or no text — pass children through.
   if (!role || !text) return childInputs;
 
   return [{ id: node.id, type: role, text, children: childInputs }];

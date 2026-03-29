@@ -2,7 +2,8 @@ import { Node } from './Node';
 import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
 import { currentTheme } from '../theme';
-import { NODE_SELECT_EVENT, NODE_RADIUS } from '../constants';
+import { NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../constants';
+import { getActiveNodeId, applyHighlight } from '../panel/activeNode';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MIN_CANVAS_WIDTH = 240;
@@ -86,7 +87,7 @@ function appendGlowFilter(svg: SVGSVGElement): void {
 }
 
 function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
-  const edgeStroke = currentTheme === 'dark' ? 'rgba(148,163,184,0.45)' : 'rgba(100,116,139,0.5)';
+  const edgeStroke = currentTheme === 'dark' ? NODE_COLORS.edge.dark : NODE_COLORS.edge.light;
   const path = document.createElementNS(SVG_NS, 'path');
   const midY = edge.from.y + (edge.to.y - edge.from.y) / 2;
 
@@ -104,11 +105,11 @@ function appendEdge(svg: SVGSVGElement, edge: ConversationEdge): void {
 function appendNode(svg: SVGSVGElement, node: Node): void {
   const group = document.createElementNS(SVG_NS, 'g');
   const roleColor = node.isUser()
-    ? '#64748b'
-    : currentTheme === 'dark' ? '#e2e8f0' : '#334155';
+    ? NODE_COLORS.user
+    : currentTheme === 'dark' ? NODE_COLORS.agent.dark : NODE_COLORS.agent.light;
   const roleGlow = node.isUser()
-    ? 'rgba(100,116,139,0.3)'
-    : currentTheme === 'dark' ? 'rgba(226,232,240,0.25)' : 'rgba(51,65,85,0.25)';
+    ? NODE_COLORS.userGlow
+    : currentTheme === 'dark' ? NODE_COLORS.agentGlow.dark : NODE_COLORS.agentGlow.light;
   const title = document.createElementNS(SVG_NS, 'title');
   title.textContent = `${node.type}: ${node.id}`;
 
@@ -134,7 +135,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
   const label = document.createElementNS(SVG_NS, 'text');
   label.setAttribute('x', String(node.x + LABEL_OFFSET_X));
   label.setAttribute('y', String(node.y + 4));
-  const labelFill = currentTheme === 'dark' ? 'rgba(226,232,240,0.92)' : 'rgba(30,41,59,0.9)';
+  const labelFill = currentTheme === 'dark' ? NODE_COLORS.label.dark : NODE_COLORS.label.light;
   label.setAttribute('fill', labelFill);
   label.setAttribute('font-size', String(LABEL_FONT_SIZE));
   label.setAttribute('font-family', 'system-ui, sans-serif');
@@ -208,4 +209,10 @@ export function renderConversationTree(
   }
 
   container.appendChild(svg);
+
+  // Re-apply active highlight after render.
+  const activeId = getActiveNodeId();
+  if (activeId) {
+    applyHighlight(container, activeId);
+  }
 }

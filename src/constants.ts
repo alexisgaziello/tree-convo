@@ -18,3 +18,16 @@ export const PANEL_HEIGHT_VH = 80;
 export const PANEL_WIDTH_VW = 15;
 export const TOGGLE_TOP_VH = 25;
 export const NODE_RADIUS = 8;
+
+export const NODE_COLORS = {
+  user: '#64748b',
+  agent: { dark: '#e2e8f0', light: '#334155' },
+  userGlow: 'rgba(100,116,139,0.3)',
+  agentGlow: { dark: 'rgba(226,232,240,0.25)', light: 'rgba(51,65,85,0.25)' },
+  activeHalo: 'rgba(59,130,246,0.5)',
+  edge: { dark: 'rgba(148,163,184,0.45)', light: 'rgba(100,116,139,0.5)' },
+  label: { dark: 'rgba(226,232,240,0.92)', light: 'rgba(30,41,59,0.9)' },
+} as const;
+
+/** Fraction of viewport height used as the anchor line for scroll-based node highlighting. */
+export const VIEWPORT_ANCHOR = 0.25;
