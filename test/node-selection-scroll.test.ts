@@ -1,7 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { NODE_SELECT_EVENT } from '../src/constants';
+import { NODE_SELECT_EVENT } from '../src/common/constants';
 
 describe('node selection scrolling integration', () => {
   afterEach(() => {

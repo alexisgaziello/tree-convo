@@ -1,6 +1,6 @@
-import { buildTree, renderConversationTree } from './index';
-import type { ConversationNodeInput } from './graph/conversationSchema';
-import { Node } from './graph/Node';
+import { buildTree, renderConversationTree } from '../tree';
+import type { ConversationNodeInput } from '../tree/conversationSchema';
+import { Node } from '../tree/Node';
 
 /** Build a flat ID → Node lookup from a tree root. */
 function indexTree(root: Node): Map<string, Node> {

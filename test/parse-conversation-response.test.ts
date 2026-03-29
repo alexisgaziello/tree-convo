@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseConversationResponse } from '../src/api/parseConversationResponse';
 import { apiConversationFixture } from './fixtures/apiConversationFixture';
-import type { ConversationNodeInput } from '../src/graph/conversationSchema';
+import type { ConversationNodeInput } from '../src/tree/conversationSchema';
 
 describe('parseConversationResponse', () => {
   it('skips system, tool-call, and hidden nodes — returns only visible turns', () => {

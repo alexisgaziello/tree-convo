@@ -1,4 +1,4 @@
-import { PANEL_TOP_VH, PANEL_HEIGHT_VH, TOGGLE_TOP_VH } from '../constants';
+import { PANEL_TOP_VH, PANEL_HEIGHT_VH, TOGGLE_TOP_VH } from '../common/constants';
 
 const DURATION = 320;
 const EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';

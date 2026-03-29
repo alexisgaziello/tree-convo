@@ -57,9 +57,13 @@ pnpm build:all      # All three
 pnpm install
 pnpm build:watch    # Rebuild userscript on file changes
 pnpm typecheck      # Type check without emitting
+pnpm lint           # Run ESLint
+pnpm format:check   # Check Prettier formatting
 pnpm test           # Run tests
 pnpm test:watch     # Run tests in watch mode
 ```
+
+A pre-commit hook (via Husky) automatically runs ESLint and Prettier on staged files.
 
 ## How It Works
 
@@ -69,29 +73,7 @@ pnpm test:watch     # Run tests in watch mode
 4. Renders nodes and edges as SVG in a fixed side panel
 5. Syncs scroll position and highlights the active branch in real time
 
-When you click a node on a different branch, Chat Tree finds the fork point and clicks ChatGPT's branch navigation arrows to switch the visible conversation path.
-
-## Project Structure
-
-```
-src/
-  api/                  # Fetch intercept + response parsing
-  dom/                  # DOM selectors, branch navigation
-  graph/                # Node class, tree building, layout, SVG rendering
-  panel/                # Panel UI, button, scroll sync, branch highlighting
-  constants.ts          # Colors, dimensions, event names
-  setup.ts              # Fetch intercept + UI boot
-  main.ts               # Entry point
-  TreeController.ts     # Coordinates rendering and node indexing
-assets/
-  icons/                # Source SVG + generated PNGs for extensions
-  panel/                # Panel toggle chevron
-builds/
-  tampermonkey/         # Vite config + userscript metadata
-  chrome/               # Vite config + MV3 manifest
-  firefox/              # Vite config + MV2 manifest + page context injector
-  extension.config.ts   # Shared extension build logic
-```
+When you click a node on a different branch, Chat Tree walks up to find every fork point between the current and target branches, then navigates them top-down by clicking ChatGPT's branch navigation arrows.
 
 ## Tech Stack
 

@@ -1,1 +1,0 @@
-export { navigateToBranch } from './navigateToBranch';

@@ -1,5 +1,5 @@
-import { Node } from '../graph/Node';
-import { getTurnElement } from './selectors';
+import { Node } from '../tree/Node';
+import { getTurnElement } from './dom';
 
 interface ForkPoint {
   /** The child on the path toward the target. */

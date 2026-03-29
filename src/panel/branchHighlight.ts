@@ -1,5 +1,5 @@
-import { NODE_COLORS } from '../constants';
-import { getTurnElement } from '../dom/selectors';
+import { NODE_COLORS } from '../common/constants';
+import { getTurnElement } from '../common/dom';
 
 const INACTIVE_BRANCH_OPACITY = '0.4';
 

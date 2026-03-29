@@ -5,7 +5,7 @@ import {
   PANEL_TOP_VH,
   PANEL_WIDTH_VW,
   PANEL_HEIGHT_VH,
-} from '../constants';
+} from '../common/constants';
 import { setupPanelAnimation } from './animation';
 import { createButton } from './button';
 

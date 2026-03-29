@@ -1,12 +1,12 @@
-import { APP_IDS } from './constants';
+import { APP_IDS } from './common/constants';
 import { createPanel } from './panel/panel';
-import { initTheme } from './theme';
-import { getScrollContainer } from './dom/selectors';
+import { initTheme } from './common/theme';
+import { getScrollContainer } from './common/dom';
 import { syncTreePanelAfterRender } from './panel/treeTracking';
 import { bindScrollAndSelect } from './panel/bindScrollAndSelect';
 import { interceptConversationFetch } from './api';
-import { TreeController } from './TreeController';
-import type { ConversationNodeInput } from './graph/conversationSchema';
+import { TreeController } from './common/TreeController';
+import type { ConversationNodeInput } from './tree/conversationSchema';
 
 let pending: { id: string; tree: ConversationNodeInput }[] = [];
 let controller: TreeController | null = null;

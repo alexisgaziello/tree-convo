@@ -1,8 +1,8 @@
 import { Node } from './Node';
 import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
-import { currentTheme } from '../theme';
-import { NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../constants';
+import { currentTheme } from '../common/theme';
+import { NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../common/constants';
 import { hierarchy } from 'd3-hierarchy';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';

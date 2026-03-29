@@ -4,7 +4,7 @@ import { collectBranchIds } from '../src/panel/branchHighlight';
 
 // Mock getTurnElement — controls which nodes are "visible" in ChatGPT's DOM.
 const visibleNodeIds = new Set<string>();
-vi.mock('../src/dom/selectors', () => ({
+vi.mock('../src/common/dom', () => ({
   getTurnElement: (id: string) => (visibleNodeIds.has(id) ? document.createElement('div') : null),
 }));
 

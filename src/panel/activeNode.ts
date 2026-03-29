@@ -1,5 +1,5 @@
-import { VIEWPORT_ANCHOR } from '../constants';
-import { getTurnElement } from '../dom/selectors';
+import { VIEWPORT_ANCHOR } from '../common/constants';
+import { getTurnElement } from '../common/dom';
 
 /** Tracks the currently highlighted node ID across renders. */
 let activeId: string | null = null;

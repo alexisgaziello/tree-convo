@@ -1,6 +1,6 @@
-export { APP_IDS, APP_PREFIX } from './constants';
+export { APP_IDS, APP_PREFIX } from './common/constants';
 export { createPanel } from './panel/panel';
-export { buildTree, renderConversationTree } from './graph';
-export { currentTheme, initTheme } from './theme';
+export { buildTree, renderConversationTree } from './tree';
+export { currentTheme, initTheme } from './common/theme';
 export { interceptConversationFetch, parseConversationResponse } from './api';
-export type { Theme } from './theme';
+export type { Theme } from './common/theme';

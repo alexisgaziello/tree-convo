@@ -3,13 +3,13 @@ import {
   NODE_SELECT_EVENT,
   VIEWPORT_ANCHOR,
   type NodeSelectDetail,
-} from '../constants';
-import { getTurnElement } from '../dom/selectors';
-import { navigateToBranch } from '../dom/navigateToBranch';
+} from '../common/constants';
+import { getTurnElement } from '../common/dom';
+import { navigateToBranch } from '../common/navigateToBranch';
 import { syncTreePanel } from './treeTracking';
 import { setActiveNodeId } from './activeNode';
 import { applyBranchHighlight } from './branchHighlight';
-import type { TreeController } from '../TreeController';
+import type { TreeController } from '../common/TreeController';
 
 /** Scroll so the top of `el` sits at the viewport anchor line. */
 function scrollToAnchor(el: Element): void {

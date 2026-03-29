@@ -1,4 +1,4 @@
-import type { ConversationNodeInput, ConversationNodeRole } from '../graph/conversationSchema';
+import type { ConversationNodeInput, ConversationNodeRole } from '../tree/conversationSchema';
 
 interface ApiContent {
   parts?: unknown[];

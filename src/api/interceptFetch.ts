@@ -1,5 +1,5 @@
 import { parseConversationResponse } from './parseConversationResponse';
-import type { ConversationNodeInput } from '../graph/conversationSchema';
+import type { ConversationNodeInput } from '../tree/conversationSchema';
 
 const CONVERSATION_URL_PATTERN = /\/backend-api\/conversation\/[0-9a-f-]+$/;
 

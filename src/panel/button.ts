@@ -1,4 +1,4 @@
-import { APP_IDS, TOGGLE_TOP_VH, TOGGLE_COLORS } from '../constants';
+import { APP_IDS, TOGGLE_TOP_VH, TOGGLE_COLORS } from '../common/constants';
 import chevronSvg from '../../assets/panel/chevron.svg?raw';
 import iconSvg from '../../assets/icons/icon.svg?raw';
 

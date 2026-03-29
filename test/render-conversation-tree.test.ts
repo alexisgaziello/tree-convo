@@ -1,9 +1,9 @@
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 
-import { NODE_SELECT_EVENT } from '../src/constants';
-import { buildTree } from '../src/graph/buildTree';
-import { renderConversationTree } from '../src/graph/renderConversationTree';
+import { NODE_SELECT_EVENT } from '../src/common/constants';
+import { buildTree } from '../src/tree/buildTree';
+import { renderConversationTree } from '../src/tree/renderConversationTree';
 
 describe('renderConversationTree', () => {
   it('renders node labels and dispatches a selection event on click', () => {
