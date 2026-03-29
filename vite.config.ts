@@ -1,25 +1,12 @@
-import { defineConfig } from 'vite';
-import monkey from 'vite-plugin-monkey';
+import { defineConfig, type UserConfig } from 'vite';
+import { resolve } from 'path';
 
-export default defineConfig({
-  plugins: [
-    monkey({
-      entry: 'src/main.ts',
-      userscript: {
-        name: 'Chat Tree',
-        namespace: 'chat-tree',
-        version: '0.1.0',
-        description: 'Tree visualizer for branched ChatGPT conversations',
-        match: [
-          'https://chatgpt.com/*',
-          'https://chat.openai.com/*'
-        ],
-        grant: 'none',
-        'inject-into': 'page',
-      }
-    })
-  ],
+/** Shared Vite config that all build targets extend. */
+export const baseConfig: UserConfig = {
+  root: resolve(__dirname),
   build: {
-    sourcemap: true
-  }
-});
+    sourcemap: true,
+  },
+};
+
+export default defineConfig(baseConfig);

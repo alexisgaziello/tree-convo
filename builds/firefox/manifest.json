@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "Chat Tree",
+  "version": "0.1.0",
+  "description": "Tree visualizer for branched ChatGPT conversations",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chat-tree@tree-convo"
+    }
+  }
+}

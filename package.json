@@ -5,9 +5,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:watch": "vite build --watch",
+    "dev": "vite --config builds/tampermonkey/vite.config.ts",
+    "build": "pnpm build:tampermonkey",
+    "build:tampermonkey": "vite build --config builds/tampermonkey/vite.config.ts",
+    "build:chrome": "vite build --config builds/chrome/vite.config.ts",
+    "build:firefox": "vite build --config builds/firefox/vite.config.ts",
+    "build:all": "pnpm build:tampermonkey && pnpm build:chrome && pnpm build:firefox",
+    "build:watch": "vite build --watch --config builds/tampermonkey/vite.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts"
