@@ -20,10 +20,9 @@ export function boot(): void {
   const controller = new TreeController(canvas, onRender);
 
   controller.loadFromApi();
-  controller.renderFromDom();
 
   // Binds ongoing scroll/select event listeners (separate from the per-render sync above).
   bindScrollAndSelect(canvas, scrollContainer, controller);
-  observeMain(() => { controller.checkUrlChange(); controller.scheduleRender(); });
+  observeMain(() => { controller.checkUrlChange(); controller.scheduleReload(); });
   window.addEventListener('popstate', () => controller.checkUrlChange());
 }
