@@ -25,6 +25,43 @@ function pulseToggle(toggle: HTMLButtonElement): void {
   }, TOGGLE_PRESS_ANIMATION_MS);
 }
 
+interface ToggleElements {
+  toggle: HTMLButtonElement;
+  peek: Element | null;
+  full: Element | null;
+}
+
+function setExpanded({ toggle, peek, full }: ToggleElements, expanded: boolean): void {
+  toggle.style.width = expanded
+    ? `${TOGGLE_EXPANDED_WIDTH_PX}px`
+    : `${TOGGLE_COLLAPSED_WIDTH_PX}px`;
+  toggle.style.background = expanded ? TOGGLE_COLORS.background : TOGGLE_COLORS.backgroundFaded;
+  toggle.style.borderColor = expanded
+    ? TOGGLE_COLORS.border
+    : TOGGLE_COLORS.borderFaded;
+  toggle.style.boxShadow = expanded
+    ? TOGGLE_COLORS.shadowExpanded
+    : TOGGLE_COLORS.shadowCollapsed;
+
+  if (peek instanceof HTMLElement) {
+    setIconLayerStyles(peek, !expanded);
+  }
+
+  if (full instanceof HTMLElement) {
+    setIconLayerStyles(full, expanded);
+  }
+}
+
+function handlePointerMove(elements: ToggleElements, event: MouseEvent): void {
+  const viewportDistance = window.innerWidth - event.clientX;
+  const rect = elements.toggle.getBoundingClientRect();
+  const withinVerticalRange =
+    event.clientY >= rect.top - TOGGLE_VERTICAL_MARGIN_PX &&
+    event.clientY <= rect.bottom + TOGGLE_VERTICAL_MARGIN_PX;
+
+  setExpanded(elements, viewportDistance <= TOGGLE_PROXIMITY_PX && withinVerticalRange);
+}
+
 export function createButton(onToggle: () => void): void {
   if (document.getElementById(APP_IDS.panelToggle)) {
     return;
@@ -68,45 +105,15 @@ export function createButton(onToggle: () => void): void {
 
   const peek = toggle.querySelector('[data-mode="peek"]');
   const full = toggle.querySelector('[data-mode="full"]');
+  const elements: ToggleElements = { toggle, peek, full };
 
-  function setExpanded(expanded: boolean): void {
-    toggle.style.width = expanded
-      ? `${TOGGLE_EXPANDED_WIDTH_PX}px`
-      : `${TOGGLE_COLLAPSED_WIDTH_PX}px`;
-    toggle.style.background = expanded ? TOGGLE_COLORS.background : TOGGLE_COLORS.backgroundFaded;
-    toggle.style.borderColor = expanded
-      ? TOGGLE_COLORS.border
-      : TOGGLE_COLORS.borderFaded;
-    toggle.style.boxShadow = expanded
-      ? TOGGLE_COLORS.shadowExpanded
-      : TOGGLE_COLORS.shadowCollapsed;
-
-    if (peek instanceof HTMLElement) {
-      setIconLayerStyles(peek, !expanded);
-    }
-
-    if (full instanceof HTMLElement) {
-      setIconLayerStyles(full, expanded);
-    }
-  }
-
-  function handlePointerMove(event: MouseEvent): void {
-    const viewportDistance = window.innerWidth - event.clientX;
-    const rect = toggle.getBoundingClientRect();
-    const withinVerticalRange =
-      event.clientY >= rect.top - TOGGLE_VERTICAL_MARGIN_PX &&
-      event.clientY <= rect.bottom + TOGGLE_VERTICAL_MARGIN_PX;
-
-    setExpanded(viewportDistance <= TOGGLE_PROXIMITY_PX && withinVerticalRange);
-  }
-
-  setExpanded(false);
+  setExpanded(elements, false);
 
   toggle.addEventListener('click', () => {
     pulseToggle(toggle);
     onToggle();
   });
-  toggle.addEventListener('mouseenter', () => setExpanded(true));
-  window.addEventListener('mousemove', handlePointerMove);
+  toggle.addEventListener('mouseenter', () => setExpanded(elements, true));
+  window.addEventListener('mousemove', (e) => handlePointerMove(elements, e));
   document.body.appendChild(toggle);
 }

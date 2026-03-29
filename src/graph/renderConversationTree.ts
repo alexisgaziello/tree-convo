@@ -3,6 +3,7 @@ import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
 import { currentTheme } from '../theme';
 import { NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../constants';
+import { hierarchy } from 'd3-hierarchy';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MIN_CANVAS_WIDTH = 240;
@@ -23,24 +24,14 @@ function getNodeLabel(node: Node): string {
   return `${compactText.slice(0, LABEL_MAX_LENGTH).trimEnd()}…`;
 }
 
-function collectGraph(root: Node): {
-  nodes: Node[];
-  edges: ConversationEdge[];
-} {
-  const nodes: Node[] = [];
-  const edges: ConversationEdge[] = [];
-
-  function traverse(node: Node): void {
-    nodes.push(node);
-
-    for (const child of node.children) {
-      edges.push({ from: node, to: child });
-      traverse(child);
-    }
-  }
-
-  traverse(root);
-
+/** Flatten a Node tree into arrays of nodes and parent→child edges using d3-hierarchy. */
+function collectGraph(root: Node): { nodes: Node[]; edges: ConversationEdge[] } {
+  const h = hierarchy(root, (n: Node) => n.children);
+  const nodes = h.descendants().map((d: { data: Node }) => d.data);
+  const edges = h.links().map((l: { source: { data: Node }; target: { data: Node } }) => ({
+    from: l.source.data,
+    to: l.target.data,
+  }));
   return { nodes, edges };
 }
 

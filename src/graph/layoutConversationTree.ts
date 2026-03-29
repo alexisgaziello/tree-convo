@@ -17,6 +17,31 @@ export interface ConversationTreeLayoutOptions {
   branchStaggerY?: number;
 }
 
+/** For each node with multiple children, assign a stagger offset based on sibling index. */
+function buildStaggerMap(layoutRoot: { each: (fn: (entry: LayoutEntry) => void) => void }, branchStaggerY: number): Map<Node, number> {
+  const staggerMap = new Map<Node, number>();
+  layoutRoot.each((entry: LayoutEntry) => {
+    const children = entry.data.children;
+    if (children.length > 1) {
+      for (let i = 0; i < children.length; i++) {
+        staggerMap.set(children[i], i * branchStaggerY);
+      }
+    }
+  });
+  return staggerMap;
+}
+
+/** Sum stagger offsets from a node up to the root (cumulative down the tree). */
+function cumulativeStagger(node: Node, staggerMap: Map<Node, number>): number {
+  let total = 0;
+  let current: Node | null = node;
+  while (current) {
+    total += staggerMap.get(current) ?? 0;
+    current = current.parent ?? null;
+  }
+  return total;
+}
+
 export function layoutConversationTree(
   root: Node,
   {
@@ -33,30 +58,9 @@ export function layoutConversationTree(
 
   treeLayout(layoutRoot);
 
-  // Compute per-node stagger: for each node with siblings, offset Y by branch index × delta
-  const staggerMap = new Map<Node, number>();
-  layoutRoot.each((entry: LayoutEntry) => {
-    const children = entry.data.children;
-    if (children.length > 1) {
-      for (let i = 0; i < children.length; i++) {
-        staggerMap.set(children[i], i * branchStaggerY);
-      }
-    }
-  });
-
-  // Propagate: a node's total stagger = its own + its parent's (cumulative down the tree)
-  function cumulativeStagger(node: Node): number {
-    let total = 0;
-    let current: Node | null = node;
-    while (current) {
-      total += staggerMap.get(current) ?? 0;
-      current = current.parent ?? null;
-    }
-    return total;
-  }
+  const staggerMap = buildStaggerMap(layoutRoot, branchStaggerY);
 
   let minX = Number.POSITIVE_INFINITY;
-
   layoutRoot.each((entry: LayoutEntry) => {
     minX = Math.min(minX, entry.x);
   });
@@ -66,7 +70,7 @@ export function layoutConversationTree(
   layoutRoot.each((entry: LayoutEntry) => {
     const zigzag = entry.data.isAgent() ? -zigzagOffsetX : zigzagOffsetX;
     entry.data.x = entry.x + offsetX + zigzag;
-    entry.data.y = entry.y + startY + cumulativeStagger(entry.data);
+    entry.data.y = entry.y + startY + cumulativeStagger(entry.data, staggerMap);
     entry.data.depth = entry.depth;
   });
 }
