@@ -2,8 +2,10 @@ import { Node } from './Node';
 import type { ConversationEdge } from './conversationSchema';
 import { layoutConversationTree } from './layoutConversationTree';
 import { currentTheme } from '../common/theme';
-import { NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../common/constants';
+import { APP_PREFIX, NODE_SELECT_EVENT, NODE_RADIUS, NODE_COLORS } from '../common/constants';
 import { hierarchy } from 'd3-hierarchy';
+
+const GLOW_FILTER_ID = `${APP_PREFIX}-node-glow`;
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MIN_CANVAS_WIDTH = 240;
@@ -52,7 +54,7 @@ function createSvg(width: number, height: number): SVGSVGElement {
 function appendGlowFilter(svg: SVGSVGElement): void {
   const defs = document.createElementNS(SVG_NS, 'defs');
   const glowFilter = document.createElementNS(SVG_NS, 'filter');
-  glowFilter.setAttribute('id', 'chat-tree-node-glow');
+  glowFilter.setAttribute('id', GLOW_FILTER_ID);
   glowFilter.setAttribute('x', '-50%');
   glowFilter.setAttribute('y', '-50%');
   glowFilter.setAttribute('width', '200%');
@@ -127,7 +129,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
   circle.setAttribute('fill', roleColor);
   circle.setAttribute('stroke', 'rgba(255,255,255,0.9)');
   circle.setAttribute('stroke-width', '2');
-  circle.setAttribute('filter', 'url(#chat-tree-node-glow)');
+  circle.setAttribute('filter', `url(#${GLOW_FILTER_ID})`);
 
   const label = document.createElementNS(SVG_NS, 'text');
   label.setAttribute('x', String(node.x + LABEL_OFFSET_X));

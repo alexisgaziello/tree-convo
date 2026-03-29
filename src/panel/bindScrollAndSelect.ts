@@ -1,4 +1,5 @@
 import {
+  APP_PREFIX,
   PANEL_OPENED_EVENT,
   NODE_SELECT_EVENT,
   VIEWPORT_ANCHOR,
@@ -67,11 +68,32 @@ export function bindScrollAndSelect(
       el = getTurnElement(nodeId);
     }
 
-    if (!el) return;
+    if (!el) {
+      console.error(`[${APP_PREFIX}] failed to navigate to node ${nodeId}`);
+      return;
+    }
     scrollLocked = true;
     scrollToAnchor(el);
-    setTimeout(() => {
+
+    // Wait for smooth scroll to finish by polling until scrollTop stabilizes
+    // across two consecutive frames.
+    if (scrollContainer) {
+      let lastTop = scrollContainer.scrollTop;
+      let settled = 0;
+      const check = () => {
+        const top = scrollContainer!.scrollTop;
+        if (top === lastTop) {
+          settled++;
+        } else {
+          settled = 0;
+          lastTop = top;
+        }
+        if (settled < 3) requestAnimationFrame(check);
+        else scrollLocked = false;
+      };
+      requestAnimationFrame(check);
+    } else {
       scrollLocked = false;
-    }, 600);
+    }
   });
 }

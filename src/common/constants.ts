@@ -1,8 +1,8 @@
 export const APP_PREFIX = 'tree-convo';
 
 export const APP_IDS = {
-  panel: 'chat-tree-panel',
-  panelToggle: 'chat-tree-panel-toggle',
+  panel: `${APP_PREFIX}-panel`,
+  panelToggle: `${APP_PREFIX}-panel-toggle`,
 } as const;
 
 export const NODE_SELECT_EVENT = `${APP_PREFIX}:node-select`;
