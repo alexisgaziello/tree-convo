@@ -1,6 +1,4 @@
 import { buildTree, renderConversationTree } from './index';
-import { fetchConversationTree } from './api';
-import { getConversationId } from './dom/selectors';
 import type { ConversationNodeInput } from './graph/conversationSchema';
 import { Node } from './graph/Node';
 
@@ -17,8 +15,7 @@ function indexTree(root: Node): Map<string, Node> {
 }
 
 export class TreeController {
-  private lastUrl = location.href;
-  private renderTimeout: number | null = null;
+  private lastConversationId: string | null = null;
   private canvas: HTMLElement;
   private onRender: () => void;
   /** Flat lookup of all nodes by ID, rebuilt on each render. */
@@ -29,34 +26,26 @@ export class TreeController {
     this.onRender = onRender;
   }
 
-  private render(input: ConversationNodeInput): void {
+  /** Called when a conversation response is intercepted. */
+  handleConversation(conversationId: string, input: ConversationNodeInput): void {
+    this.lastConversationId = conversationId;
     const root = buildTree(input);
     this.nodeIndex = indexTree(root);
     renderConversationTree(root, this.canvas);
     this.onRender();
   }
 
-  async loadFromApi(): Promise<void> {
-    const id = getConversationId();
-    if (!id) return;
-    const tree = await fetchConversationTree(id);
-    if (tree) this.render(tree);
-  }
-
-  /** Debounced API reload (e.g. after DOM mutations). */
-  scheduleReload(): void {
-    if (this.renderTimeout !== null) window.clearTimeout(this.renderTimeout);
-    this.renderTimeout = window.setTimeout(() => this.loadFromApi(), 150);
-  }
-
+  /** Check if the URL changed to a different conversation. */
   checkUrlChange(): void {
-    if (location.href === this.lastUrl) return;
-    this.lastUrl = location.href;
-    this.reset();
-    this.loadFromApi();
+    const match = location.pathname.match(/\/c\/([0-9a-f-]+)/);
+    const currentId = match ? match[1] : null;
+    if (currentId !== this.lastConversationId) {
+      this.reset();
+    }
   }
 
   reset(): void {
+    this.lastConversationId = null;
     this.nodeIndex.clear();
     this.canvas.innerHTML = '';
   }

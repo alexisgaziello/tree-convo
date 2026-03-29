@@ -1,1 +1,1 @@
-export { observeMain } from './observeMain';
+export { navigateToBranch } from './navigateToBranch';

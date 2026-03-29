@@ -1,2 +1,2 @@
-export { fetchConversationTree } from './fetchConversation';
+export { interceptConversationFetch } from './interceptFetch';
 export { parseConversationResponse } from './parseConversationResponse';
