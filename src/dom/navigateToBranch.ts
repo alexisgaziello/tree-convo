@@ -1,11 +1,65 @@
 import { Node } from '../graph/Node';
 import { getTurnElement } from './selectors';
 
+interface ForkPoint {
+  /** The child on the path toward the target. */
+  child: Node;
+  siblings: Node[];
+  targetIndex: number;
+}
+
+/**
+ * Collect every fork between `target` and the root where the target's
+ * ancestor is not the currently displayed sibling. Returns them
+ * shallowest-first so we can navigate top-down.
+ */
+function collectForks(target: Node): ForkPoint[] {
+  const forks: ForkPoint[] = [];
+  let current: Node | null = target;
+  while (current) {
+    const parent = current.parent;
+    if (parent && parent.children.length > 1) {
+      const targetIndex = parent.children.indexOf(current);
+      if (targetIndex >= 0) {
+        forks.push({ child: current, siblings: parent.children, targetIndex });
+      }
+    }
+    current = current.parent;
+  }
+  return forks.reverse(); // shallowest first
+}
+
+/**
+ * Click the prev/next navigation button on the currently displayed sibling
+ * to switch to `targetIndex` within `siblings`.
+ */
+async function switchAtFork(siblings: Node[], targetIndex: number): Promise<boolean> {
+  const currentIndex = siblings.findIndex((c) => getTurnElement(c.id));
+  if (currentIndex < 0 || currentIndex === targetIndex) return currentIndex === targetIndex;
+
+  const currentEl = getTurnElement(siblings[currentIndex].id);
+  if (!currentEl) return false;
+
+  const container = currentEl.closest('[data-message-id]') ?? currentEl;
+  const clicks = targetIndex - currentIndex;
+  const btn = container.querySelector<HTMLButtonElement>(
+    `button[aria-label="${clicks > 0 ? 'Next' : 'Previous'} response"]`,
+  );
+  if (!btn) return false;
+
+  for (let i = 0; i < Math.abs(clicks); i++) {
+    btn.click();
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return true;
+}
+
 /**
  * Navigate ChatGPT's UI to show the branch containing `targetId`.
  *
- * Finds the fork point between the currently displayed branch and the target,
- * then clicks the branch navigation arrows at the fork to switch siblings.
+ * Collects all fork points between the target and the root, then navigates
+ * them top-down (shallowest first) so that deeper branches become visible
+ * before we try to switch them.
  */
 export async function navigateToBranch(
   targetId: string,
@@ -14,52 +68,9 @@ export async function navigateToBranch(
   const target = nodeIndex.get(targetId);
   if (!target) return;
 
-  // Walk up from target to find the first ancestor whose parent has multiple children
-  // AND whose sibling is currently visible in the DOM (i.e., the fork point).
-  let forkChild: Node | null = null;
-  let current: Node | null = target;
-  while (current) {
-    const parent = current.parent;
-    if (parent && parent.children.length > 1) {
-      // Check if a different sibling is currently displayed.
-      const displayedSibling = parent.children.find((c) => c !== current && getTurnElement(c.id));
-      if (displayedSibling) {
-        forkChild = current;
-        break;
-      }
-    }
-    current = current.parent;
-  }
+  const forks = collectForks(target);
 
-  if (!forkChild || !forkChild.parent) return;
-
-  const siblings = forkChild.parent.children;
-  const targetIndex = siblings.indexOf(forkChild);
-  if (targetIndex < 0) return;
-
-  // Find which sibling is currently displayed to determine click direction.
-  const currentIndex = siblings.findIndex((c) => getTurnElement(c.id));
-  if (currentIndex < 0 || currentIndex === targetIndex) return;
-
-  // Find the navigation buttons on the currently displayed sibling's DOM element.
-  const currentEl = getTurnElement(siblings[currentIndex].id);
-  if (!currentEl) return;
-
-  const container = currentEl.closest('[data-message-id]') ?? currentEl;
-  const prevBtn = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="Previous response"]',
-  );
-  const nextBtn = container.querySelector<HTMLButtonElement>('button[aria-label="Next response"]');
-
-  if (!prevBtn && !nextBtn) return;
-
-  const clicks = targetIndex - currentIndex;
-  const btn = clicks > 0 ? nextBtn : prevBtn;
-  if (!btn) return;
-
-  for (let i = 0; i < Math.abs(clicks); i++) {
-    btn.click();
-    // Wait for ChatGPT to re-render between clicks.
-    await new Promise((r) => setTimeout(r, 300));
+  for (const { siblings, targetIndex } of forks) {
+    await switchAtFork(siblings, targetIndex);
   }
 }
