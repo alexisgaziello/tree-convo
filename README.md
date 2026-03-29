@@ -44,11 +44,12 @@ pnpm build:all      # All three
 2. Go to `chrome://extensions` → enable Developer mode
 3. Click "Load unpacked" → select `dist/chrome/`
 
-### Firefox
+### Firefox (Developer Edition or Nightly)
 
 1. Run `pnpm build:firefox`
-2. Go to `about:debugging` → "This Firefox"
-3. Click "Load Temporary Add-on" → select `dist/firefox/manifest.json`
+2. Set `xpinstall.signatures.required` to `false` in `about:config`
+3. Go to `about:debugging` → "This Firefox"
+4. Click "Load Temporary Add-on" → select any file in `dist/firefox/`
 
 ## Development
 
@@ -62,29 +63,33 @@ pnpm test:watch     # Run tests in watch mode
 
 ## How It Works
 
-1. Fetches the full conversation tree from ChatGPT's internal API (`/backend-api/conversation/:id`)
-2. Builds a `Node` tree with parent/child relationships
+1. Intercepts ChatGPT's own API responses (`/backend-api/conversation/:id`) via a `fetch` patch — no extra network requests
+2. Parses the response into a `Node` tree with parent/child relationships
 3. Computes a top-down layout using `d3-hierarchy`
 4. Renders nodes and edges as SVG in a fixed side panel
 5. Syncs scroll position and highlights the active branch in real time
 
-When you click a node on a different branch, Chat Tree finds the fork point and clicks ChatGPT's branch navigation arrows (`< 1/3 >`) to switch the visible conversation path.
+When you click a node on a different branch, Chat Tree finds the fork point and clicks ChatGPT's branch navigation arrows to switch the visible conversation path.
 
 ## Project Structure
 
 ```
 src/
-  api/                  # API fetch + response parsing
-  dom/                  # DOM selectors, mutation observer, branch navigation
+  api/                  # Fetch intercept + response parsing
+  dom/                  # DOM selectors, branch navigation
   graph/                # Node class, tree building, layout, SVG rendering
-  panel/                # Panel UI, button, scroll sync, highlighting
+  panel/                # Panel UI, button, scroll sync, branch highlighting
   constants.ts          # Colors, dimensions, event names
-  boot.ts               # Entry point wiring
-  main.ts               # Bootstrap (DOMContentLoaded guard)
+  setup.ts              # Fetch intercept + UI boot
+  main.ts               # Entry point
+  TreeController.ts     # Coordinates rendering and node indexing
+assets/
+  icons/                # Source SVG + generated PNGs for extensions
+  panel/                # Panel toggle chevron
 builds/
   tampermonkey/         # Vite config + userscript metadata
   chrome/               # Vite config + MV3 manifest
-  firefox/              # Vite config + MV2 manifest
+  firefox/              # Vite config + MV2 manifest + page context injector
   extension.config.ts   # Shared extension build logic
 ```
 
