@@ -1,7 +1,6 @@
-import { boot } from './boot';
+import { installIntercept, boot } from './setup';
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
+installIntercept();
+
+if (document.readyState !== 'loading') boot();
+else document.addEventListener('DOMContentLoaded', boot);
