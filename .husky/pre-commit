@@ -1,0 +1,26 @@
+set -e
+
+staged="$(mktemp)"
+lint_files="$(mktemp)"
+trap 'rm -f "$staged" "$lint_files"' EXIT
+
+git diff --cached --name-only -z --diff-filter=ACMR > "$staged"
+
+[ -s "$staged" ] || exit 0
+
+# Format all staged files (--ignore-unknown skips binaries, images, etc.)
+xargs -0 pnpm exec prettier --write --ignore-unknown < "$staged"
+
+# Filter to JS/TS files for linting
+xargs -0 sh -c '
+  for f; do
+    case "$f" in *.js|*.jsx|*.ts|*.tsx|*.mjs|*.cjs) printf "%s\0" "$f" ;; esac
+  done
+' _ < "$staged" > "$lint_files"
+
+if [ -s "$lint_files" ]; then
+  xargs -0 pnpm exec eslint --fix < "$lint_files"
+fi
+
+# Re-stage everything that was touched
+xargs -0 git add < "$staged"
