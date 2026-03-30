@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $(basename "$0") <version>" >&2
+  echo "  e.g. $(basename "$0") v1.0.0  or  $(basename "$0") 1.0.0" >&2
+  exit 1
+fi
+
+# Normalize: strip leading v, then validate, then re-add v for the tag.
+version="${1#v}"
+
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Invalid version format: $1" >&2
+  echo "Expected: vX.Y.Z or X.Y.Z (digits only)" >&2
+  exit 1
+fi
+
+tag="v$version"
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "$repo_root" ]]; then
+  echo "Not a git repository." >&2
+  exit 1
+fi
+
+if git -C "$repo_root" rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+  echo "Tag already exists: $tag" >&2
+  exit 1
+fi
+
+# Update version in all locations.
+files_to_stage=()
+
+# package.json
+perl -i -pe 's/"version": "[^"]*"/"version": "'"$version"'"/' "$repo_root/package.json"
+files_to_stage+=("$repo_root/package.json")
+
+# Chrome manifest
+perl -i -pe 's/"version": "[^"]*"/"version": "'"$version"'"/' "$repo_root/builds/chrome/manifest.json"
+files_to_stage+=("$repo_root/builds/chrome/manifest.json")
+
+# Firefox manifest
+perl -i -pe 's/"version": "[^"]*"/"version": "'"$version"'"/' "$repo_root/builds/firefox/manifest.json"
+files_to_stage+=("$repo_root/builds/firefox/manifest.json")
+
+# Tampermonkey vite config
+perl -i -pe "s/version: '[^']*'/version: '$version'/" "$repo_root/builds/tampermonkey/vite.config.ts"
+files_to_stage+=("$repo_root/builds/tampermonkey/vite.config.ts")
+
+git -C "$repo_root" add "${files_to_stage[@]}"
+
+if git -C "$repo_root" diff --cached --quiet; then
+  echo "No changes staged (already at $version?)" >&2
+  exit 1
+fi
+
+git -C "$repo_root" commit -m "release $tag"
+git -C "$repo_root" tag "$tag"
+
+echo "Released $tag"
