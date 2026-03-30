@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Chat Tree",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Tree visualizer for branched ChatGPT conversations",
   "icons": {
     "16": "icon-16.png",
@@ -10,10 +10,7 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://chatgpt.com/*",
-        "https://chat.openai.com/*"
-      ],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "js": ["inject.js"],
       "run_at": "document_start"
     }
