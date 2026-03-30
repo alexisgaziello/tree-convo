@@ -109,7 +109,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
       ? NODE_COLORS.agentGlow.dark
       : NODE_COLORS.agentGlow.light;
   const title = document.createElementNS(SVG_NS, 'title');
-  title.textContent = `${node.type}: ${node.id}`;
+  title.textContent = node.text;
 
   group.style.cursor = 'pointer';
   group.dataset.nodeId = node.id;
