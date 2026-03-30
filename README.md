@@ -4,6 +4,8 @@ A browser extension and userscript that visualizes ChatGPT conversation branches
 
 ChatGPT conversations branch through edits, regenerations, and alternate responses — but the UI only shows one path at a time. Chat Tree adds a side panel that renders the full tree structure so you can see every branch at a glance.
 
+![Chat Tree demo](assets/demo-screenshots/demo-screenshot.png)
+
 ## Features
 
 - Side panel with SVG tree visualization of the full conversation
