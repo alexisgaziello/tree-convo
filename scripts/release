@@ -50,12 +50,8 @@ files_to_stage+=("$repo_root/builds/tampermonkey/vite.config.ts")
 
 git -C "$repo_root" add "${files_to_stage[@]}"
 
-if git -C "$repo_root" diff --cached --quiet; then
-  echo "No changes staged (already at $version?)" >&2
-  exit 1
-fi
-
-git -C "$repo_root" commit -m "release $tag"
+# Commit even if versions were already up to date (empty commit marks the release).
+git -C "$repo_root" commit --allow-empty -m "release $tag"
 git -C "$repo_root" tag "$tag"
 
 echo "Released $tag"
