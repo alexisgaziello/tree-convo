@@ -1,7 +1,7 @@
 import { APP_IDS } from './common/constants';
 import { createPanel } from './panel/panel';
 import { initTheme } from './common/theme';
-import { getScrollContainer } from './common/dom';
+import { getScrollContainer, watchNavigation } from './common/dom';
 import { syncTreePanelAfterRender } from './panel/treeTracking';
 import { bindScrollAndSelect } from './panel/bindScrollAndSelect';
 import { interceptConversationFetch } from './api';
@@ -43,5 +43,5 @@ export function boot(): void {
   pending = [];
 
   bindScrollAndSelect(canvas, scrollContainer, controller);
-  window.addEventListener('popstate', () => controller!.checkUrlChange());
+  watchNavigation(() => controller!.checkUrlChange());
 }
