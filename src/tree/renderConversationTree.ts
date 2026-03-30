@@ -161,7 +161,7 @@ function appendNode(svg: SVGSVGElement, node: Node): void {
 }
 
 export function renderConversationTree(root: Node, container: HTMLElement): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   layoutConversationTree(root);
 

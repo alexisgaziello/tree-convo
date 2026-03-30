@@ -47,6 +47,6 @@ export class TreeController {
   reset(): void {
     this.lastConversationId = null;
     this.nodeIndex.clear();
-    this.canvas.innerHTML = '';
+    this.canvas.replaceChildren();
   }
 }

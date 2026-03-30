@@ -18,10 +18,10 @@
   "web_accessible_resources": ["content.js"],
   "browser_specific_settings": {
     "gecko": {
-      "id": "chat-tree@tree-convo"
+      "id": "chat-tree@tree-convo",
+      "data_collection_permissions": {
+        "is_collecting_data": false
+      }
     }
-  },
-  "data_collection_permissions": {
-    "is_collecting_data": false
   }
 }

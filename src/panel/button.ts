@@ -65,14 +65,26 @@ export function createButton(onToggle: () => void): void {
 
   const toggle = document.createElement('button');
   toggle.id = APP_IDS.panelToggle;
-  toggle.innerHTML = `
-    <span data-mode="peek" aria-hidden="true" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
-      ${chevronSvg}
-    </span>
-    <span data-mode="full" aria-hidden="true" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
-      ${iconSvg}
-    </span>
-  `;
+
+  for (const [mode, svg] of [
+    ['peek', chevronSvg],
+    ['full', iconSvg],
+  ] as const) {
+    const span = document.createElement('span');
+    span.dataset.mode = mode;
+    span.setAttribute('aria-hidden', 'true');
+    Object.assign(span.style, {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+      height: '100%',
+    });
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svg, 'image/svg+xml');
+    span.appendChild(document.importNode(doc.documentElement, true));
+    toggle.appendChild(span);
+  }
   toggle.setAttribute('aria-label', 'Toggle conversation tree');
   toggle.setAttribute('title', 'Toggle conversation tree');
 
