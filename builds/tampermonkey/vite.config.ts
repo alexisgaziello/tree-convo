@@ -11,7 +11,7 @@ export default defineConfig(
         userscript: {
           name: 'Chat Tree',
           namespace: 'chat-tree',
-          version: '1.0.0',
+          version: '1.1.0',
           description: 'Tree visualizer for branched ChatGPT conversations',
           icon: 'https://raw.githubusercontent.com/alexisgaziello/tree-convo/main/assets/icon.svg',
           match: ['https://chatgpt.com/*', 'https://chat.openai.com/*'],
