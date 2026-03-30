@@ -20,7 +20,7 @@
     "gecko": {
       "id": "chat-tree@tree-convo",
       "data_collection_permissions": {
-        "is_collecting_data": false
+        "required": ["none"]
       }
     }
   }
